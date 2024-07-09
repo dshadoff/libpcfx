@@ -14,7 +14,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
 #include <eris/cd.h>
-#include <eris/low/pad.h>
+#include <pcfx/contrlr.h>
 #include <eris/low/scsi.h>
 
 #include "lbas.h"
@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
 	int i;
 	u32 str[256];
 	u16 microprog[16];
-	u32 paddata, lastpad;
+	u32 paddata = 0;
+	u32 lastpad = 0;
 
 	eris_king_init();
 	eris_tetsu_init();
@@ -84,23 +85,21 @@ int main(int argc, char *argv[])
 		eris_king_kram_write(0);
 	}
 	eris_king_set_kram_write(0, 1);
-	eris_low_pad_init(0);
+	contrlr_pad_init(0);
 
 	chartou32("SCSI Porn", str);
 	printstr(str, 10, 0x8, 1);
 	for(;;) {
-		if(eris_low_pad_data_ready(0)) {
-			lastpad = paddata;
-			paddata = eris_low_pad_read_data(0);
-			if(paddata & (1 << 6) && !(lastpad & (1 << 6))) { // Select
-				eris_low_scsi_abort();
-			}
-			if(paddata & (1 << 7) && !(lastpad & (1 << 7))) { // Run
-				eris_low_scsi_reset();
-			}
-			if(paddata & (1 << 0) && !(lastpad & (1 << 0))) { // (I) DMA to KRAM
-				eris_cd_read_kram(BINARY_LBA_PORN_BIN, 0x600, 0x6800);
-			}
+		lastpad = paddata;
+		paddata = contrlr_pad_read(0);
+		if(paddata & (1 << 6) && !(lastpad & (1 << 6))) { // Select
+			eris_low_scsi_abort();
+		}
+		if(paddata & (1 << 7) && !(lastpad & (1 << 7))) { // Run
+			eris_low_scsi_reset();
+		}
+		if(paddata & (1 << 0) && !(lastpad & (1 << 0))) { // (I) DMA to KRAM
+			eris_cd_read_kram(BINARY_LBA_PORN_BIN, 0x600, 0x6800);
 		}
 	}
 

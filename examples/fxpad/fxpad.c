@@ -13,7 +13,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/king.h>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
-#include <eris/pad.h>
+#include <pcfx/contrlr.h>
 
 void printch(u32 sjis, u32 kram, int tall);
 void printstr(u32* str, int x, int y, int tall);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	chartou32("FX-PAD Test", str);
 	printstr(str, 12, 0x8, 1);
 
-	eris_pad_init(0);
+	contrlr_pad_init(0);
 	chartou32("+", pstr);
 	chartou32(" ", sstr);
 	for(;;) {
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 		printstr(str, 0, 0x58, 0);
 		chartou32("| TYPE |", str);
 		printstr(str, 0, 0x68, 0);
-		padtype = eris_pad_type(0);
+		padtype = contrlr_pad_type(0);
 		if(padtype == PAD_TYPE_NONE)
 			chartou32("| NONE |", str);
 		else if(padtype == PAD_TYPE_MOUSE)
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 		else if(padtype == PAD_TYPE_FXPAD)
 			chartou32("|  PAD |", str);
 		printstr(str, 0, 0x70, 0);
-		paddata = eris_pad_read(0);
+		paddata = contrlr_pad_read(0);
 		for(i = 0; i < 16; i++) {
 			if(paddata & (1 << i))
 				printstr(pstr, padmap[i][0], padmap[i][1], 0);
