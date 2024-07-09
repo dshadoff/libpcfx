@@ -14,7 +14,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
 #include <eris/cd.h>
-#include <eris/low/pad.h>
+#include <eris/pad.h>
 #include <eris/low/scsi.h>
 
 void printch(u32 sjis, u32 kram, int tall);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 		eris_king_kram_write(0);
 	}
 	eris_king_set_kram_write(0, 1);
-	eris_low_pad_init(0);
+	eris_pad_init(0);
 
 	for(i = 0; i < 4096; i++) {
 		scsimem[i] = 0;
@@ -90,19 +90,17 @@ int main(int argc, char *argv[])
 	chartou32("SCSI Test/Example", str);
 	printstr(str, 10, 0, 1);
 	for(;;) {
-		if(eris_low_pad_data_ready(0)) {
-			lastpad = paddata;
-			paddata = eris_low_pad_read_data(0);
-			if(paddata & (1 << 6) && !(lastpad & (1 << 6))) { // Select
-				eris_low_scsi_abort();
-			}
-			if(paddata & (1 << 7) && !(lastpad & (1 << 7))) { // Run
-				eris_low_scsi_reset();
-			}
-			if(paddata & (1 << 0) && !(lastpad & (1 << 0))) { // (I) Read to Buffer
-				bytes = eris_cd_read(seekaddr, scsimem, 2048);
-				seekaddr++;
-			}
+		lastpad = paddata;
+		paddata = eris_pad_read(0);
+		if(paddata & (1 << 6) && !(lastpad & (1 << 6))) { // Select
+			eris_low_scsi_abort();
+		}
+		if(paddata & (1 << 7) && !(lastpad & (1 << 7))) { // Run
+			eris_low_scsi_reset();
+		}
+		if(paddata & (1 << 0) && !(lastpad & (1 << 0))) { // (I) Read to Buffer
+			bytes = eris_cd_read(seekaddr, scsimem, 2048);
+			seekaddr++;
 		}
 		chartou32("Read bytes:", str);
 		printstr(str, 0, 0x18, 0);
