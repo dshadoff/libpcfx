@@ -16,7 +16,7 @@
 OBJECTS        = src/crt0.o
 TARGETS        = liberis.a src/crt0.o
 LIBERISOBJS    = src/v810.o src/tetsu.o src/king.o src/romfont.o src/bkupmem.o\
-                 src/std.o src/timer.o src/cd.o src/pad.o src/7up.o
+                 src/std.o src/timer.o src/cd.o src/contrlr.o src/7up.o
 LIBERISOBJS   += src/low/soundbox.o src/low/7up.o src/low/scsi.o
 OBJECTS       += $(LIBERISOBJS)
 PREFIX         = v810
@@ -42,6 +42,7 @@ clean: cleanexamples
 install: $(TARGETS)
 	@mkdir -p $(V810GCC)/lib
 	@mkdir -p $(V810GCC)/include/eris/
+	@mkdir -p $(V810GCC)/include/pcfx/
 	@echo "    COPY  crt0.o"
 	@cp src/crt0.o $(V810GCC)/$(PREFIX)/lib/
 #	@echo "    COPY  ldscripts"

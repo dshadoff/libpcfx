@@ -15,7 +15,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/7up.h>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
-#include <eris/pad.h>
+#include <pcfx/contrlr.h>
 #include <eris/low/7up.h>
 
 void printch(u32 sjis, u32 kram, int tall);
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	eris_sup_init(0, 1);
 	eris_king_init();
 	eris_tetsu_init();
-	eris_pad_init(0);
+	contrlr_pad_init(0);
 	
 	eris_tetsu_set_priorities(0, 0, 1, 0, 0, 0, 0);
 	eris_tetsu_set_7up_palette(0, 0);
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
 	xl = yl = 1;
 	for(;;) {
-		pad = eris_pad_read(0);
+		pad = contrlr_pad_read(0);
 		eris_sup_spr_xy(x, y);
 		if((yl != 1) && (pad & (1<<10)))
 			y++;

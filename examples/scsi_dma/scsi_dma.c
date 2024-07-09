@@ -14,7 +14,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
 #include <eris/cd.h>
-#include <eris/pad.h>
+#include <pcfx/contrlr.h>
 #include <eris/low/scsi.h>
 
 #include "lbas.h"
@@ -85,13 +85,13 @@ int main(int argc, char *argv[])
 		eris_king_kram_write(0);
 	}
 	eris_king_set_kram_write(0, 1);
-	eris_pad_init(0);
+	contrlr_pad_init(0);
 
 	chartou32("SCSI Porn", str);
 	printstr(str, 10, 0x8, 1);
 	for(;;) {
 		lastpad = paddata;
-		paddata = eris_pad_read(0);
+		paddata = contrlr_pad_read(0);
 		if(paddata & (1 << 6) && !(lastpad & (1 << 6))) { // Select
 			eris_low_scsi_abort();
 		}

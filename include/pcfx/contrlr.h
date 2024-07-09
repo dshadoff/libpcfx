@@ -12,8 +12,8 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
  * Access to controller ports
  */
 
-#ifndef _LIBERIS_PAD_H_
-#define _LIBERIS_PAD_H_
+#ifndef _LIBPCFX_CONTRLR_H_
+#define _LIBPCFX_CONTRLR_H_
 
 #include <eris/types.h>
 
@@ -41,11 +41,11 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 #define MOUSE_RIGHT      0x20000
 
 
-#define KPORT_CTRL_XFER        1 /* write to initiate xfer/stays '1' until complete */
-#define KPORT_CTRL_RESETMULTI  2 /* set to '1' for first controller of multitap set */
-#define KPORT_CTRL_WRITEDATA   0 /* Set Bit 2 low for writing data to controller    */
-#define KPORT_CTRL_READDATA    4 /* Set Bit 2 high for reading data from controller */
-#define KPORT_CTRL_END         8 /* not writable; is set when scan complete (also raises interrupt) */
+#define CONTRLR_CTRL_XFER        1 /* write to initiate xfer/stays '1' until complete */
+#define CONTRLR_CTRL_RESETMULTI  2 /* set to '1' for first controller of multitap set */
+#define CONTRLR_CTRL_WRITEDATA   0 /* Set Bit 2 low for writing data to controller    */
+#define CONTRLR_CTRL_READDATA    4 /* Set Bit 2 high for reading data from controller */
+#define CONTRLR_CTRL_END         8 /* not writable; is set when scan complete (also raises interrupt) */
 
 
 typedef enum {
@@ -55,7 +55,7 @@ typedef enum {
 	PAD_TYPE_FXPAD = 15
 } pad_type;
 
-extern u32 eris_pad_values[];
+extern u32 contrlr_pad_values[];
 
 
 /*----------------------------------------------------------*/
@@ -64,36 +64,36 @@ extern u32 eris_pad_values[];
 /*----------------------------------------------------------*/
 /* These MACROs act on data already read - USE CAREFULLY !! */
 /*----------------------------------------------------------*/
-#define eris_pad_data(x) (eris_pad_values[x])
-#define eris_pad_type(x) (eris_pad_values[x] >> 28)
-#define eris_pad_connected(x) (eris_pad_type(x) != PAD_TYPE_NONE)
+#define contrlr_pad_data(x) (contrlr_pad_values[x])
+#define contrlr_pad_type(x) (contrlr_pad_values[x] >> 28)
+#define contrlr_pad_connected(x) (contrlr_pad_type(x) != PAD_TYPE_NONE)
 
-#define mouse_x(x) ((eris_pad_values[x] >> 8) & 0xFF)
-#define mouse_y(x) ((eris_pad_values[x]) & 0xFF)
+#define mouse_x(x) ((contrlr_pad_values[x] >> 8) & 0xFF)
+#define mouse_y(x) ((contrlr_pad_values[x]) & 0xFF)
 
 // Normal sequence of operation:
 //
 // Choice (a):
 // -----------
 // 1) Initialize at start of program:
-//      eris_pad_init(n);
+//      contrlr_pad_init(n);
 //
 // 2) Trigger write with control port:
-//      eris_port_write_control(n, (KPORT_CTRL_XFER|KPORT_CTRL_RESETMULTI|KPORT_READDATA));
+//      contrlr_port_write_control(n, (CONTRLR_CTRL_XFER|CONTRLR_CTRL_RESETMULTI|CONTRLR_READDATA));
 //
 // 3) Check 100usec later to ensure that scan completed:
-//      while((eris_port_status_read(n) & KPORT_CTRL_XFER) != 0);
+//      while((contrlr_port_status_read(n) & CONTRLR_CTRL_XFER) != 0);
 //
 // 4) Read data:
-//      value = eris_port_read_data(n);
+//      value = contrlr_port_read_data(n);
 //
 // Choice (b):
 // -----------
 // 1) Initialize at start of program:
-//      eris_pad_init(n);
+//      contrlr_pad_init(n);
 //
 // 2) Do steps 2), 3) and 4) in one easy function:
-//      value = eris_pad_read(n);
+//      value = contrlr_pad_read(n);
 //
 // Choice (a) has the advantage of flexibility in step 2's trigger parameters,
 // as well as the ability to do some other processing for 100usec (which is
@@ -105,7 +105,7 @@ extern u32 eris_pad_values[];
  *
  * port = The port to initialize. (0 ~ 1)
  */
-void eris_pad_init(int port);
+void contrlr_pad_init(int port);
 
 
 /* Read the pad data (assuming no multitap)
@@ -113,7 +113,7 @@ void eris_pad_init(int port);
  * pad = The pad to read. (0 ~ 1)
  * return value:  Current state of the pad.
  */
-u32 eris_pad_read(int pad);
+u32 contrlr_pad_read(int pad);
 
 
 // "port-level" functions:
@@ -122,7 +122,7 @@ u32 eris_pad_read(int pad);
  *
  * pad = The pad to initialize. (0 ~ 1)
  */
-void eris_port_init(int port);
+void contrlr_port_init(int port);
 
 
 /* Read port status.
@@ -130,7 +130,7 @@ void eris_port_init(int port);
  * port = The port to read the status of. (0 ~ 1)
  * return value = Pad's status.
  */
-u16 eris_port_read_status(int port);
+u16 contrlr_port_read_status(int port);
 
 
 /* Read port data.
@@ -138,7 +138,7 @@ u16 eris_port_read_status(int port);
  * port = The port to read data from. (0 ~ 1)
  * return value = Pad's data.
  */
-u32 eris_port_read_data(int port);
+u32 contrlr_port_read_data(int port);
 
 
 /* Write port control.
@@ -146,7 +146,7 @@ u32 eris_port_read_data(int port);
  * port = The port to write the control of. (0 ~ 1)
  * ctl = The control data to be written.
  */
-void eris_port_write_control(int port, u16 ctl);
+void contrlr_port_write_control(int port, u16 ctl);
 
 
 /* Write port data.
@@ -159,7 +159,7 @@ void eris_port_write_control(int port, u16 ctl);
  *       still active, then write data, then trigger
  *       scan by writing to control port
  */
-void eris_port_write_data(int port, u32 data);
+void contrlr_port_write_data(int port, u32 data);
 
 
 #endif
