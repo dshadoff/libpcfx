@@ -14,7 +14,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 #ifndef _LIBERIS_TETSU_H_
 #define _LIBERIS_TETSU_H_
 
-#include <eris/types.h>
+#include <pcfx/types.h>
 
 /*! \brief Number of vertical lines to display.
  */

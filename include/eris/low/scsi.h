@@ -14,7 +14,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 #ifndef _LIBERIS_LOW_SCSI_H_
 #define _LIBERIS_LOW_SCSI_H_
 
-#include <eris/types.h>
+#include <pcfx/types.h>
 
 typedef enum
 {

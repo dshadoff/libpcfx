@@ -29,8 +29,8 @@ registers that might be overwritten when calling other functions.
 #include <stdio.h>
 #include <string.h>
 
-#include <eris/types.h>
-#include <eris/std.h>
+#include <pcfx/types.h>
+#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/timer.h>
 #include <eris/king.h>

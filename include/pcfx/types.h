@@ -1,18 +1,20 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff <GitHub user: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
-/*! \file
- * \brief Standard integer types
+/*
+ * Standard integer types
  */
 
-#ifndef _LIBERIS_TYPES_H_
-#define _LIBERIS_TYPES_H_
+#ifndef _LIBPCFX_TYPES_H_
+#define _LIBPCFX_TYPES_H_
 
 typedef unsigned int		uint32_t;  /*!< Unsigned 32bit integer */
 typedef unsigned short		uint16_t;  /*!< Unsigned 16bit integer */

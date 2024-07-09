@@ -11,8 +11,8 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <stdio.h>
 #include <string.h>
 
-#include <eris/types.h>
-#include <eris/std.h>
+#include <pcfx/types.h>
+#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>

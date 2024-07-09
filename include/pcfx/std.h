@@ -1,20 +1,22 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff  <GitHub user: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
-/*! \file
- * \brief Implementation of standard functions, with modifications for speed.
+/*
+ * Implementation of standard functions, with modifications for speed.
  */
 
-#ifndef _LIBERIS_STD_H_
-#define _LIBERIS_STD_H_
+#ifndef _LIBPCFX_STD_H_
+#define _LIBPCFX_STD_H_
 
-#include <eris/types.h>
+#include <pcfx/types.h>
 
 void memset32(void* addr, u32 val, int size);
 void memset16(void* addr, u16 val, int size);

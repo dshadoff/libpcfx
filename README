@@ -1,4 +1,5 @@
-liberis (C)2011 Alex Marshall "trap15" <trap15@raidenii.net>
+libpcfx (C)2011 Alex Marshall "trap15" <trap15@raidenii.net>
+    and (C)2024 Dave Shadoff  <GitHub userid: dshadoff>
 ================================================================================
 A set of libraries for NEC/Hudson PC-FX development.
 This code is licensed to you under the terms of the MIT license;
@@ -6,25 +7,36 @@ see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 
 Subsystems
 ================================================================================
+std            -- "Standard" function replicas, with modifications for
+                  efficiency.
+
+v810           -- Miscellaneous V810 supports.
+
+contrlr        -- Handles input ports. Tested working. High- and low-level
+                  interfaces exist.
+
+bkupmem        -- Handles backup memory access
+
 7up            -- Controls the two 7up VDPs. These were also used in the
                   PC-Engine. Support is partly tested. Only low-level API exists
                   currently.
+
 cd             -- High-level interface to the CD drive. Tested working.
+
 king           -- Controls the KING chip, which controls many other peripherals.
                   Basic support exists and backgrounds have been tested working.
-pad            -- Handles input ports. Tested working. High- and low-level
-                  interfaces exist.
+
 romfont        -- Activates the in-ROM font processing. Tested working.
+
 soundbox       -- SoundBox PSG support. Similar to the PSG in the PC-Engine.
                   PSG support is tested working. Other support is untested.
                   Only low-level API exists currently.
+
 scsi           -- Interface to the SCSI interface on KING. Tested working. Only
                   low-level API exists currently.
-std            -- "Standard" function replicas, with modifications for
-                  efficiency.
+
 tetsu          -- Controls NEW Tetsukannon, the video controller. Tested
                   working.
-v810           -- Miscellaneous V810 supports.
 
 
 Credits
@@ -34,6 +46,9 @@ trap15         -- Code and reverse engineering
 Arikado        -- Support and listening to my rambling while I code
 Ryphecha       -- Inifinite amounts of help
 Mednafen       -- Greatest debugger around!
+dshadoff       -- 2024 Overhaul
+CheekyBug      -- Additional modernizations and recent v810-gcc updates
+Enthusi        -- Getting the fx_uploader kickstarted, restarting reverse-engineering
 #HACKERCHANNEL -- The cool place
 #pcfx @ EFnet  -- EFnet's premier PC-FX channel!
 

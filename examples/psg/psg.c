@@ -8,8 +8,8 @@ Copyright (C) 2024		David Shadoff  <Github ID: dshadoff>
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
-#include <eris/types.h>
-#include <eris/std.h>
+#include <pcfx/types.h>
+#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>

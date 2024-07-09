@@ -1,5 +1,6 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
       and (C) 2024              Dave Shadoff  <GitHub ID: dshadoff>
@@ -15,7 +16,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 #ifndef _LIBPCFX_CONTRLR_H_
 #define _LIBPCFX_CONTRLR_H_
 
-#include <eris/types.h>
+#include <pcfx/types.h>
 
 
 // These bits identify the various buttons on a joypad controller
