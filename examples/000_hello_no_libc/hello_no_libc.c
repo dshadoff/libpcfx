@@ -9,27 +9,36 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
+//-------------------------------------------------------------------------
+// This example is a trivial program which prints a message on the screen
+// 
+// Note that there is a significant amount of hardware initialization at
+// the start of the program to set it up into an adequate initial state.
+//
+// This example avoid use of libC and string-type functions, opting instead
+// to use similar functions implemented in <pcfx/std.h> .
+//
+// While POSIX functions may be easier to use, they are implemented as
+// abstracted 'C' functions, rather than hand-coded assembler, so they
+// may end up being much slower -- this is the value of demonstrating
+// the use of libpcfx-specific functions in std.h
+//-------------------------------------------------------------------------
 
 #include <pcfx/types.h>
+#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
 
 void printch(u32 sjis, u32 kram, int tall);
-void printstr(const char* str, int x, int y, int tall);
-
-char sda_string [32]; /* small enough to automatically go in the sda section */
-char __attribute__ ((zda)) zda_string [32];
-char __attribute__ ((tda)) tda_string [32];
+void printstr(u32* str, int x, int y, int tall);
+void chartou32(char* str, u32* o);
 
 int main(int argc, char *argv[])
 {
 	int i;
-	char str[256];
+	u32 str[256];
 	u16 microprog[16];
 
 	eris_king_init();
@@ -70,28 +79,28 @@ int main(int argc, char *argv[])
 		eris_king_kram_write(0);
 	}
 	eris_king_set_kram_write(0, 1);
-
-	strcpy(sda_string, "Hello World!");
-
-	zda_string[0] = '\0';
-	strcat(zda_string, "Love, NEC");
-
-	memcpy(tda_string, "Eat %X!", strlen("Eat %X!") + 1);
-
-	printstr(sda_string, 10, 0x20, 1);
-	printstr(zda_string, 11, 0x38, 0);
-
-	i = sprintf(str, tda_string, 0xdeadbeef);
-	printstr(str, ((32 - i) / 2), 0x48, 0);
+	chartou32("Hello World!", str);
+	printstr(str, 10, 0x20, 1);
+	chartou32("Love, NEC", str);
+	printstr(str, 11, 0x38, 0);
 
 	return 0;
 }
 
-void printstr(const char* str, int x, int y, int tall)
+void chartou32(char* str, u32* o)
+{
+	int i;
+	int len = strlen8(str);
+	for(i = 0; i < len; i++)
+		o[i] = str[i];
+	o[i] = 0;
+}
+
+void printstr(u32* str, int x, int y, int tall)
 {
 	int i;
 	u32 kram = x + (y << 5);
-	int len = strlen(str);
+	int len = strlen32(str);
 	for(i = 0; i < len; i++) {
 		printch(str[i], kram + i, tall);
 	}
@@ -113,3 +122,4 @@ void printch(u32 sjis, u32 kram, int tall)
 		eris_king_kram_write(px);
 	}
 }
+
