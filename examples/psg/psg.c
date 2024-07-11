@@ -1,15 +1,17 @@
 /*
-	liberis -- A set of libraries for controlling the NEC PC-FX
+	libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
-Copyright (C) 2024		David Shadoff  <Github ID: dshadoff>
+      and (C) 2024		David Shadoff  GitHub userid: dshadoff
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+#include <string.h>
+
 #include <pcfx/types.h>
-#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>
@@ -17,8 +19,7 @@ Copyright (C) 2024		David Shadoff  <Github ID: dshadoff>
 #include <eris/low/soundbox.h>
 
 void printch(u32 sjis, u32 kram, int tall);
-void printstr(u32* str, int x, int y, int tall);
-void chartou32(char* str, u32* o);
+void printstr(const char* str, int x, int y, int tall);
 
 void delay(void);
 
@@ -36,7 +37,6 @@ char waveform[] = {
 int main(int argc, char *argv[])
 {
 	int i, l;
-	u32 str[256];
 	u16 microprog[16];
 
 	eris_king_init();
@@ -78,8 +78,7 @@ int main(int argc, char *argv[])
 		eris_king_kram_write(0);
 	}
 	eris_king_set_kram_write(0, 1);
-	chartou32("SoundBox PSG Example", str);
-	printstr(str, 5, 0x10, 1);
+	printstr("SoundBox PSG Example", 5, 0x10, 1);
 
 	eris_low_psg_set_main_volume(12, 12);
 	for(i = 0; i < 5; i++) {
@@ -148,22 +147,16 @@ void delay(void)
 	}
 }
 
-void chartou32(char* str, u32* o)
+void printstr(const char* str, int x, int y, int tall)
 {
 	int i;
-	int len = strlen8(str);
-	for(i = 0; i < len; i++)
-		o[i] = str[i];
-	o[i] = 0;
-}
+	u32 tempstr;
 
-void printstr(u32* str, int x, int y, int tall)
-{
-	int i;
 	u32 kram = x + (y << 5);
-	int len = strlen32(str);
+	int len = strlen(str);
 	for(i = 0; i < len; i++) {
-		printch(str[i], kram + i, tall);
+		tempstr = str[i];
+		printch(tempstr, kram + i, tall);
 	}
 }
 

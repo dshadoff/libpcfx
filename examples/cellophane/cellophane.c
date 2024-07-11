@@ -1,28 +1,29 @@
 /*
-	liberis -- A set of libraries for controlling the NEC PC-FX
+	libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              David Shadoff  GitHub userid: dshadoff
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+#include <string.h>
+
 #include <pcfx/types.h>
-#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
 
 void printch(u32 sjis, u32 kram, int tall);
-void printstr(u32* str, int x, int y, int tall);
-void chartou32(char* str, u32* o);
+void printstr(const char* str, int x, int y, int tall);
 void delay(void);
 
 int main(int argc, char *argv[])
 {
 	int i;
-	u32 str[256];
 	u16 microprog[16];
 
 	eris_king_init();
@@ -64,8 +65,7 @@ int main(int argc, char *argv[])
 		eris_king_kram_write(i ^ (i << 4) ^ (i >> 4));
 	}
 	eris_king_set_kram_write(0, 1);
-	chartou32("Cellophane Test!", str);
-	printstr(str, 8, 0x20, 1);
+	printstr("Cellophane Test!", 8, 0x20, 1);
 
 	eris_tetsu_set_cellophane_coeffs(1, 1, 1, 1, 7, 7, 7);
 	eris_tetsu_set_cellophane_color(0x8088);
@@ -92,22 +92,16 @@ void delay(void)
 	}
 }
 
-void chartou32(char* str, u32* o)
+void printstr(const char* str, int x, int y, int tall)
 {
 	int i;
-	int len = strlen8(str);
-	for(i = 0; i < len; i++)
-		o[i] = str[i];
-	o[i] = 0;
-}
+	u32 tempchr;
 
-void printstr(u32* str, int x, int y, int tall)
-{
-	int i;
 	u32 kram = x + (y << 5);
-	int len = strlen32(str);
+	int len = strlen(str);
 	for(i = 0; i < len; i++) {
-		printch(str[i], kram + i, tall);
+		tempchr = str[i];
+		printch(tempchr, kram + i, tall);
 	}
 }
 

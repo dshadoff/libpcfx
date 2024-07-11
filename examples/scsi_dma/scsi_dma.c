@@ -1,14 +1,17 @@
 /*
-	liberis -- A set of libraries for controlling the NEC PC-FX
+	libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024		David Shadoff  GitHub userid: dshadoff
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+#include <string.h>
+
 #include <pcfx/types.h>
-#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>
@@ -20,8 +23,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include "lbas.h"
 
 void printch(u32 sjis, u32 kram, int tall);
-void printstr(u32* str, int x, int y, int tall);
-void chartou32(char* str, u32* o);
+void printstr(const char* str, int x, int y, int tall);
 void printhex(void* data, int x, int y, int bytes, int addr, int tall);
 char x1toa(int val);
 
@@ -41,7 +43,6 @@ const u16 pornpal[] = {
 int main(int argc, char *argv[])
 {
 	int i;
-	u32 str[256];
 	u16 microprog[16];
 	u32 paddata = 0;
 	u32 lastpad = 0;
@@ -87,8 +88,7 @@ int main(int argc, char *argv[])
 	eris_king_set_kram_write(0, 1);
 	contrlr_pad_init(0);
 
-	chartou32("SCSI Porn", str);
-	printstr(str, 10, 0x8, 1);
+	printstr("SCSI Porn", 10, 0x8, 1);
 	for(;;) {
 		lastpad = paddata;
 		paddata = contrlr_pad_read(0);
@@ -117,7 +117,6 @@ char x1toa(int val)
 
 void printhex(void* data, int x, int y, int bytes, int addr, int tall)
 {
-	u32 ostr[256];
 	char tmpstr[256];
 	int tmpptr = 0;
 	int i, l;
@@ -137,27 +136,20 @@ void printhex(void* data, int x, int y, int bytes, int addr, int tall)
 			tmpstr[tmpptr++] = ' ';
 		}
 		tmpstr[tmpptr] = 0;
-		chartou32(tmpstr, ostr);
-		printstr(ostr, x, y + i, tall);
+		printstr(tmpstr, x, y + i, tall);
 	}
 }
 
-void chartou32(char* str, u32* o)
+void printstr(const char* str, int x, int y, int tall)
 {
 	int i;
-	int len = strlen8(str);
-	for(i = 0; i < len; i++)
-		o[i] = str[i];
-	o[i] = 0;
-}
+	u32 tempstr;
 
-void printstr(u32* str, int x, int y, int tall)
-{
-	int i;
 	u32 kram = (x + (y << 5)) << 1;
-	int len = strlen32(str);
+	int len = strlen(str);
 	for(i = 0; i < len; i++) {
-		printch(str[i], kram + (i<<1), tall);
+		tempstr = str[i];
+		printch(tempstr, kram + (i<<1), tall);
 	}
 }
 

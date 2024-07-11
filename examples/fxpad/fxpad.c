@@ -1,14 +1,18 @@
 /*
-	liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
-Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
+Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              David Shadoff  GitHub userid: dshadoff
+
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+#include <string.h>
+
 #include <pcfx/types.h>
-#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>
@@ -16,8 +20,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <pcfx/contrlr.h>
 
 void printch(u32 sjis, u32 kram, int tall);
-void printstr(u32* str, int x, int y, int tall);
-void chartou32(char* str, u32* o);
+void printstr(const char* str, int x, int y, int tall);
 
 static int padmap[16][2] = {
 	{ 7-3, 0x40 },
@@ -42,9 +45,6 @@ int main(int argc, char *argv[])
 {
 	u32 paddata, padtype;
 	int i;
-	u32 str[256];
-	u32 pstr[3];
-	u32 sstr[3];
 	u16 microprog[16];
 
 	eris_king_init();
@@ -84,39 +84,30 @@ int main(int argc, char *argv[])
 	for(i = 0x0; i < 0x1E00; i++) {
 		eris_king_kram_write(0);
 	}
-	chartou32("FX-PAD Test", str);
-	printstr(str, 12, 0x8, 1);
+	printstr("FX-PAD Test", 12, 0x8, 1);
 
 	contrlr_pad_init(0);
-	chartou32("+", pstr);
-	chartou32(" ", sstr);
 	for(;;) {
-		chartou32("|  UP  | DOWN | LEFT |RIGHT |", str);
-		printstr(str, 0, 0x28, 0);
-		chartou32("|   I  |  II  |  III |", str);
-		printstr(str, 0, 0x38, 0);
-		chartou32("|  IV  |   V  |  VI  |", str);
-		printstr(str, 0, 0x48, 0);
-		chartou32("|  RUN |SELECT|   A  |   B  |", str);
-		printstr(str, 0, 0x58, 0);
-		chartou32("| TYPE |", str);
-		printstr(str, 0, 0x68, 0);
+		printstr("|  UP  | DOWN | LEFT |RIGHT |", 0, 0x28, 0);
+		printstr("|   I  |  II  |  III |", 0, 0x38, 0);
+		printstr("|  IV  |   V  |  VI  |", 0, 0x48, 0);
+		printstr("|  RUN |SELECT|   A  |   B  |", 0, 0x58, 0);
+		printstr("| TYPE |", 0, 0x68, 0);
 		padtype = contrlr_pad_type(0);
 		if(padtype == PAD_TYPE_NONE)
-			chartou32("| NONE |", str);
+			printstr("| NONE |", 0, 0x70, 0);
 		else if(padtype == PAD_TYPE_MOUSE)
-			chartou32("|MOUSE |", str);
+			printstr("|MOUSE |", 0, 0x70, 0);
 		else if(padtype == PAD_TYPE_MULTITAP)
-			chartou32("|  TAP |", str);
+			printstr("|  TAP |", 0, 0x70, 0);
 		else if(padtype == PAD_TYPE_FXPAD)
-			chartou32("|  PAD |", str);
-		printstr(str, 0, 0x70, 0);
+			printstr("|  PAD |", 0, 0x70, 0);
 		paddata = contrlr_pad_read(0);
 		for(i = 0; i < 16; i++) {
 			if(paddata & (1 << i))
-				printstr(pstr, padmap[i][0], padmap[i][1], 0);
+				printstr("+", padmap[i][0], padmap[i][1], 0);
 			else
-				printstr(sstr, padmap[i][0], padmap[i][1], 0);
+				printstr(" ", padmap[i][0], padmap[i][1], 0);
 		}
 		for(i = 0; i < 0x8000; i++) {
 			asm("mov r0, r0");
@@ -126,22 +117,16 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void chartou32(char* str, u32* o)
+void printstr(const char* str, int x, int y, int tall)
 {
 	int i;
-	int len = strlen8(str);
-	for(i = 0; i < len; i++)
-		o[i] = str[i];
-	o[i] = 0;
-}
+	u32 tempstr;
 
-void printstr(u32* str, int x, int y, int tall)
-{
-	int i;
 	u32 kram = x + (y << 5);
-	int len = strlen32(str);
+	int len = strlen(str);
 	for(i = 0; i < len; i++) {
-		printch(str[i], kram + i, tall);
+		tempstr = str[i];
+		printch(tempstr, kram + i, tall);
 	}
 }
 

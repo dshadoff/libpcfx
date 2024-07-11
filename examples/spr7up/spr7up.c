@@ -1,15 +1,18 @@
 /*
-	liberis -- A set of libraries for controlling the NEC PC-FX
+	libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
       and (C) 2024		David Shadoff  GitHub userid: dshadoff
+
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+#include <string.h>
+
 #include <pcfx/types.h>
-#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/7up.h>
@@ -19,8 +22,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/low/7up.h>
 
 void printch(u32 sjis, u32 kram, int tall);
-void printstr(u32* str, int x, int y, int tall);
-void chartou32(char* str, u32* o);
+void printstr(const char* str, int x, int y, int tall);
 
 // This data is sprite encoding data for a 16x16 '+' sign
 //
@@ -38,7 +40,6 @@ const uint16_t spr_data[] = {
 int main(int argc, char *argv[])
 {
 	int i, x, y, xl, yl;
-	u32 str[256];
 	u16 microprog[16];
 	u32 pad;
 
@@ -105,8 +106,7 @@ int main(int argc, char *argv[])
 	eris_sup_spr_create(0, 0, 0, 0);
 
 	eris_king_set_kram_write(0, 1);
-	chartou32("7up sprite example", str);
-	printstr(str, 7, 0x10, 1);
+	printstr("7up sprite example", 7, 0x10, 1);
 
 	x = 0x40;  // note that X-offsets are not 0-relative (0x20 is the left edge of the screen)
 	y = 0x60;  // note that Y-offsets are not 0-relative (0x40 is the top edge of the screen)
@@ -137,22 +137,16 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void chartou32(char* str, u32* o)
+void printstr(const char* str, int x, int y, int tall)
 {
 	int i;
-	int len = strlen8(str);
-	for(i = 0; i < len; i++)
-		o[i] = str[i];
-	o[i] = 0;
-}
+	u32 tempstr;
 
-void printstr(u32* str, int x, int y, int tall)
-{
-	int i;
 	u32 kram = x + (y << 5);
-	int len = strlen32(str);
+	int len = strlen(str);
 	for(i = 0; i < len; i++) {
-		printch(str[i], kram + i, tall);
+		tempstr = str[i];
+		printch(tempstr, kram + i, tall);
 	}
 }
 

@@ -1,14 +1,17 @@
 /*
-	liberis -- A set of libraries for controlling the NEC PC-FX
+	libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff   GitHub userid: dshadoff
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+#include <string.h>
+
 #include <pcfx/types.h>
-#include <pcfx/std.h>
 #include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>
@@ -16,15 +19,13 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/bkupmem.h>
 
 void printch(u32 sjis, u32 kram, int tall);
-void printstr(u32* str, int x, int y, int tall);
-void chartou32(char* str, u32* o);
+void printstr(const char* str, int x, int y, int tall);
 void printhex(void* data, int x, int y, int bytes, int addr, int tall);
 char x1toa(int data);
 
 int main(int argc, char *argv[])
 {
 	int i;
-	u32 str[256];
 	u16 microprog[16];
 	u8 tmpbuf[0x80];
 	u16 bps[2], sects[2];
@@ -69,8 +70,7 @@ int main(int argc, char *argv[])
 		eris_king_kram_write(0);
 	}
 	eris_king_set_kram_write(0, 1);
-	chartou32("Backup Memory", str);
-	printstr(str, 8, 2, 1);
+	printstr("Backup Memory", 8, 2, 1);
 
 	eris_bkupmem_set_access(1, 1);
 	eris_bkupmem_read(0, tmpbuf, 0, 0x40);
@@ -78,8 +78,7 @@ int main(int argc, char *argv[])
 	eris_bkupmem_read(1, tmpbuf, 0, 0x40);
 	printhex(tmpbuf, 0, 0xA0, 0x40, 1, 0);
 
-	chartou32("Checking memory sizes...", str);
-	printstr(str, 0, 0x22, 0);
+	printstr("Checking memory sizes...", 0, 0x22, 0);
 
 	eris_bkupmem_read(0, tmpbuf, 0x13, 2);
 	eris_bkupmem_read(0, tmpbuf + 2, 0xB, 2);
@@ -105,12 +104,9 @@ int main(int argc, char *argv[])
 	bps[1] = ((bps[1] & 0x00FF) << 8) | ((bps[1] & 0xFF00) >> 8);
 	sects[1] = ((sects[1] & 0x00FF) << 8) | ((sects[1] & 0xFF00) >> 8);
 
-	chartou32("          B/Sectors   Sectors", str);
-	printstr(str, 0, 0x2A, 1);
-	chartou32("Internal: ", str);
-	printstr(str, 0, 0x3A, 1);
-	chartou32("External: ", str);
-	printstr(str, 0, 0x4A, 1);
+	printstr("          B/Sectors   Sectors", 0, 0x2A, 1);
+	printstr("Internal: ", 0, 0x3A, 1);
+	printstr("External: ", 0, 0x4A, 1);
 
 	printhex(bps, 0xE, 0x3A, 2, 0, 1);
 	printhex(sects, 0x19, 0x3A, 2, 0, 1);
@@ -132,7 +128,6 @@ char x1toa(int val)
 
 void printhex(void* data, int x, int y, int bytes, int addr, int tall)
 {
-	u32 ostr[256];
 	char tmpstr[256];
 	int tmpptr = 0;
 	int i, l;
@@ -152,27 +147,20 @@ void printhex(void* data, int x, int y, int bytes, int addr, int tall)
 			tmpstr[tmpptr++] = ' ';
 		}
 		tmpstr[tmpptr] = 0;
-		chartou32(tmpstr, ostr);
-		printstr(ostr, x, y + i, tall);
+		printstr(tmpstr, x, y + i, tall);
 	}
 }
 
-void chartou32(char* str, u32* o)
+void printstr(const char* str, int x, int y, int tall)
 {
 	int i;
-	int len = strlen8(str);
-	for(i = 0; i < len; i++)
-		o[i] = str[i];
-	o[i] = 0;
-}
+	u32 tmpstr;
 
-void printstr(u32* str, int x, int y, int tall)
-{
-	int i;
 	u32 kram = x + (y << 5);
-	int len = strlen32(str);
+	int len = strlen(str);
 	for(i = 0; i < len; i++) {
-		printch(str[i], kram + i, tall);
+		tmpstr = str[i];
+		printch(tmpstr, kram + i, tall);
 	}
 }
 
