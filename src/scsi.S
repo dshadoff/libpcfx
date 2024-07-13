@@ -10,21 +10,21 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 /*****************************************************************************
  * HuC6272 (KING) SCSI functions                                         []  *
  *****************************************************************************/
-	.global _eris_low_scsi_get_phase
-	.global _eris_low_scsi_status
-	.global _eris_low_scsi_reset
-	.global _eris_low_scsi_data_in
-	.global _eris_low_scsi_data_out
-	.global _eris_low_scsi_begin_dma
-	.global _eris_low_scsi_check_dma
-	.global _eris_low_scsi_finish_dma
-	.global _eris_low_scsi_abort
-	.global _eris_low_scsi_command
-	.global _eris_low_scsi_test_unit_ready
+	.global _eris_scsi_get_phase
+	.global _eris_scsi_status
+	.global _eris_scsi_reset
+	.global _eris_scsi_data_in
+	.global _eris_scsi_data_out
+	.global _eris_scsi_begin_dma
+	.global _eris_scsi_check_dma
+	.global _eris_scsi_finish_dma
+	.global _eris_scsi_abort
+	.global _eris_scsi_command
+	.global _eris_scsi_test_unit_ready
 
-	.global	eris_low_scsi_eat_data_in
+	.global	eris_scsi_eat_data_in
 
-_eris_low_scsi_get_phase:
+_eris_scsi_get_phase:
 	in.h	0x602[r0], r11
 	mov	0, r10         # Bus Free
 	andi	0x40, r11, r12
@@ -68,9 +68,9 @@ scsi_phase_status_tbl:
 	.word	0 # Message In
 	.word	0 # Illegal
 
-_eris_low_scsi_status:
+_eris_scsi_status:
 	mov	lp, r15
-	jal	_eris_low_scsi_get_phase
+	jal	_eris_scsi_get_phase
 	shl	2, r10
 	movea	lo(scsi_phase_status_tbl), r0, r12
 	movhi	hi(scsi_phase_status_tbl), r12, r12
@@ -124,7 +124,7 @@ _eris_low_scsi_status:
 	mov	r15, lp
 	jmp	[lp]
 
-_eris_low_scsi_reset:
+_eris_scsi_reset:
 	movea	0x1000, r0, r10
 	mov	1, r11
 	movea	0x80, r0, r12
@@ -138,7 +138,7 @@ _eris_low_scsi_reset:
 	out.h	r0, 0x604[r0]
 	jmp	[lp]
 
-_eris_low_scsi_data_in:
+_eris_scsi_data_in:
 	mov	0, r14
 	mov	lp, r15
 1:	in.h	0x602[r0], r10
@@ -170,7 +170,7 @@ _eris_low_scsi_data_in:
 	andi	0x20, r11, r11
 	be	3b
 
-2:	jal	_eris_low_scsi_get_phase
+2:	jal	_eris_scsi_get_phase
 	cmp	3, r10 # data in
 	bne	1f
 	cmp	0, r7
@@ -181,7 +181,7 @@ _eris_low_scsi_data_in:
 	mov	r15, lp
 	jmp	[lp]
 
-_eris_low_scsi_data_out:
+_eris_scsi_data_out:
 	mov	0, r14
 	mov	lp, r15
 	mov	3, r11
@@ -214,7 +214,7 @@ _eris_low_scsi_data_out:
 	andi	0x20, r11, r11
 	be	3b
 
-2:	jal	_eris_low_scsi_get_phase
+2:	jal	_eris_scsi_get_phase
 	cmp	2, r10 # data out
 	bne	1f
 	add	1, r6
@@ -226,7 +226,7 @@ _eris_low_scsi_data_out:
 	mov	r15, lp
 	jmp	[lp]
 
-_eris_low_scsi_begin_dma:
+_eris_scsi_begin_dma:
 	mov	3, r10
 	mov	2, r12
 	mov	1, r11
@@ -255,7 +255,7 @@ _eris_low_scsi_begin_dma:
 
 	jmp	[lp]
 
-_eris_low_scsi_check_dma:
+_eris_scsi_check_dma:
 	mov	11, r11
 	out.h	r11, 0x600[r0]
 	add	-1, r11
@@ -270,7 +270,7 @@ _eris_low_scsi_check_dma:
 1:
 	jmp	[lp]
 
-_eris_low_scsi_finish_dma:
+_eris_scsi_finish_dma:
 	mov	2, r13
 	out.h	r13, 0x600[r0]
 	add	1, r13
@@ -279,9 +279,9 @@ _eris_low_scsi_finish_dma:
 	add	-2, r13
 	out.h	r0, 0x604[r0]
 
-	jr	eris_low_scsi_eat_data_in
+	jr	eris_scsi_eat_data_in
 
-_eris_low_scsi_abort:
+_eris_scsi_abort:
 	mov	1, r10
 	out.h	r0, 0x600[r0]
 	out.h	r0, 0x604[r0]
@@ -320,7 +320,7 @@ _eris_low_scsi_abort:
 	bne	9b
 .endm
 
-_eris_low_scsi_command:
+_eris_scsi_command:
 	mov	lp, r15
 	mov	0, r14
 	mov	1, r13
@@ -345,7 +345,7 @@ _eris_low_scsi_command:
 
 	scsi_delay
 
-1:	jal	_eris_low_scsi_get_phase
+1:	jal	_eris_scsi_get_phase
 	be	1b
 
 	scsi_delay
@@ -355,7 +355,7 @@ _eris_low_scsi_command:
 
 	scsi_delay
 
-1:	jal	_eris_low_scsi_get_phase
+1:	jal	_eris_scsi_get_phase
 	cmp	4, r10 # command
 	bne	1b
 
@@ -399,7 +399,7 @@ _eris_low_scsi_command:
 	andi	0x20, r11, r11
 	be	3b
 
-2:	jal	_eris_low_scsi_get_phase
+2:	jal	_eris_scsi_get_phase
 	cmp	4, r10 # command
 	be	1b
 
@@ -414,7 +414,7 @@ _eris_low_scsi_command:
 	mov	r15, lp
 	jmp	[lp]
 
-eris_low_scsi_eat_data_in:
+eris_scsi_eat_data_in:
 	mov	lp, r20
 	mov	1, r13
 	movea	0x10, r0, r14
@@ -434,7 +434,7 @@ eris_low_scsi_eat_data_in:
 	andi	0x20, r11, r11
 	be	3b
 
-2:	jal	_eris_low_scsi_get_phase
+2:	jal	_eris_scsi_get_phase
 	cmp	3, r10 # data in
 	be	1b
 

@@ -18,7 +18,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/romfont.h>
 #include <eris/cd.h>
 #include <pcfx/contrlr.h>
-#include <eris/low/scsi.h>
+#include <eris/scsi.h>
 
 #include "lbas.h"
 
@@ -93,10 +93,10 @@ int main(int argc, char *argv[])
 		lastpad = paddata;
 		paddata = contrlr_pad_read(0);
 		if(paddata & (1 << 6) && !(lastpad & (1 << 6))) { // Select
-			eris_low_scsi_abort();
+			eris_scsi_abort();
 		}
 		if(paddata & (1 << 7) && !(lastpad & (1 << 7))) { // Run
-			eris_low_scsi_reset();
+			eris_scsi_reset();
 		}
 		if(paddata & (1 << 0) && !(lastpad & (1 << 0))) { // (I) DMA to KRAM
 			eris_cd_read_kram(BINARY_LBA_PORN_BIN, 0x600, 0x6800);

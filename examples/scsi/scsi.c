@@ -18,7 +18,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/romfont.h>
 #include <eris/cd.h>
 #include <pcfx/contrlr.h>
-#include <eris/low/scsi.h>
+#include <eris/scsi.h>
 
 void printch(u32 sjis, u32 kram, int tall);
 void printstr(const char* str, int x, int y, int tall);
@@ -94,10 +94,10 @@ int main(int argc, char *argv[])
 		lastpad = paddata;
 		paddata = contrlr_pad_read(0);
 		if(paddata & (1 << 6) && !(lastpad & (1 << 6))) { // Select
-			eris_low_scsi_abort();
+			eris_scsi_abort();
 		}
 		if(paddata & (1 << 7) && !(lastpad & (1 << 7))) { // Run
-			eris_low_scsi_reset();
+			eris_scsi_reset();
 		}
 		if(paddata & (1 << 0) && !(lastpad & (1 << 0))) { // (I) Read to Buffer
 			bytes = eris_cd_read(seekaddr, scsimem, 2048);

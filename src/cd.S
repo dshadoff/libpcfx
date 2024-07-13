@@ -15,7 +15,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 	.global _eris_cd_read_kram
 
 _eris_cd_reset:
-	jr	_eris_low_scsi_reset
+	jr	_eris_scsi_reset
 
 _eris_cd_read:
 	mov	lp, r19
@@ -54,7 +54,7 @@ _eris_cd_read:
 
 	mov	sp, r6
 	mov	10, r7
-	jal	_eris_low_scsi_command
+	jal	_eris_scsi_command
 	addi	32, sp, sp
 
 	movea	0x800, r0, r10
@@ -67,10 +67,10 @@ _eris_cd_read:
 
 	mov	r18, r6
 	mov	r17, r7
-	jal	_eris_low_scsi_data_in
+	jal	_eris_scsi_data_in
 	mov	r10, r18
 
-	jal	eris_low_scsi_eat_data_in
+	jal	eris_scsi_eat_data_in
 
 	movea	0x800, r0, r10
 1:	nop
@@ -80,7 +80,7 @@ _eris_cd_read:
 	add	-1, r10
 	bne	1b
 
-	jal	_eris_low_scsi_status
+	jal	_eris_scsi_status
 
 	mov	r18, r10
 	mov	r19, lp
@@ -123,7 +123,7 @@ _eris_cd_read_kram:
 
 	mov	sp, r6
 	mov	10, r7
-	jal	_eris_low_scsi_command
+	jal	_eris_scsi_command
 	addi	32, sp, sp
 
 	movea	0x800, r0, r10
@@ -135,19 +135,19 @@ _eris_cd_read_kram:
 	andi	0x20, r10, r10
 	be	1b
 
-	jal	_eris_low_scsi_status
+	jal	_eris_scsi_status
 
 	mov	r18, r6
 	mov	r17, r7
-	jal	_eris_low_scsi_begin_dma
+	jal	_eris_scsi_begin_dma
 
-1:	jal	_eris_low_scsi_check_dma
+1:	jal	_eris_scsi_check_dma
 	cmp	0, r10
 	bne	1b
 
-	jal	_eris_low_scsi_finish_dma
+	jal	_eris_scsi_finish_dma
 
-	jal	_eris_low_scsi_status
+	jal	_eris_scsi_status
 
 	mov	r19, lp
 	jmp	[lp]
