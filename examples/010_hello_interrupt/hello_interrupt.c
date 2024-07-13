@@ -42,8 +42,9 @@ have updated it).
 #include <string.h>
 
 #include <pcfx/types.h>
+#include <pcfx/timer.h>
+
 #include <eris/v810.h>
-#include <eris/timer.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
@@ -66,7 +67,7 @@ __attribute__ ((noinline)) void increment_zda_uninitialized (void)
 /* Because it is not a leaf function, it will use the full IRQ preamble. */
 __attribute__ ((interrupt)) void my_timer_irq (void)
 {
-	eris_timer_ack_irq();
+	timer_ack_irq();
 
 	increment_zda_uninitialized();
 	zda_initialized += zda_constant; 
@@ -185,9 +186,9 @@ int main(int argc, char *argv[])
 	irq_set_mask(0x37);
 
 	// Reset and start the Timer.
-	eris_timer_init();
-	eris_timer_set_period(23864); /* approx 1/60th of a second */
-	eris_timer_start(1);
+	timer_init();
+	timer_set_period(23864); /* approx 1/60th of a second */
+	timer_start(1);
 
 	// Allow all IRQs.
 	//
