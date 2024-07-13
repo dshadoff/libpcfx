@@ -16,7 +16,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <eris/king.h>
 #include <eris/tetsu.h>
 #include <eris/romfont.h>
-#include <eris/low/soundbox.h>
+#include <eris/soundbox.h>
 
 void printch(u32 sjis, u32 kram, int tall);
 void printstr(const char* str, int x, int y, int tall);
@@ -80,55 +80,55 @@ int main(int argc, char *argv[])
 	eris_king_set_kram_write(0, 1);
 	printstr("SoundBox PSG Example", 5, 0x10, 1);
 
-	eris_low_psg_set_main_volume(12, 12);
+	eris_psg_set_main_volume(12, 12);
 	for(i = 0; i < 5; i++) {
-		eris_low_psg_set_channel(i);
-		eris_low_psg_set_balance(0xF, 0xF);
-		eris_low_psg_set_volume(0, 0, 0);
+		eris_psg_set_channel(i);
+		eris_psg_set_balance(0xF, 0xF);
+		eris_psg_set_volume(0, 0, 0);
 
 		for(l = 0; l < 32; l++) {
-			eris_low_psg_waveform_data(waveform[l]);
+			eris_psg_waveform_data(waveform[l]);
 		}
 	}
 
 	delay();
 
-	eris_low_psg_set_channel(0);
-	eris_low_psg_set_freq(428); /* C4 */
-	eris_low_psg_set_volume(0x1F, 1, 0);
+	eris_psg_set_channel(0);
+	eris_psg_set_freq(428); /* C4 */
+	eris_psg_set_volume(0x1F, 1, 0);
 
 	delay();
 
-	eris_low_psg_set_channel(1);
-	eris_low_psg_set_freq(339); /* E4 */
-	eris_low_psg_set_volume(0x1F, 1, 0);
+	eris_psg_set_channel(1);
+	eris_psg_set_freq(339); /* E4 */
+	eris_psg_set_volume(0x1F, 1, 0);
 
 	delay();
 
-	eris_low_psg_set_channel(2);
-	eris_low_psg_set_freq(285); /* G4 (to make major 'C' chord)  */
-	eris_low_psg_set_volume(0x1F, 1, 0);
+	eris_psg_set_channel(2);
+	eris_psg_set_freq(285); /* G4 (to make major 'C' chord)  */
+	eris_psg_set_volume(0x1F, 1, 0);
 
 	for (i = 0; i < 12; i++) {
 		delay();
 	}
 
 	// stop the music
-	eris_low_psg_set_channel(0);
-	eris_low_psg_set_volume(0x00, 0, 0);
-	eris_low_psg_set_channel(1);
-	eris_low_psg_set_volume(0x00, 0, 0);
-	eris_low_psg_set_channel(2);
-	eris_low_psg_set_volume(0x00, 0, 0);
+	eris_psg_set_channel(0);
+	eris_psg_set_volume(0x00, 0, 0);
+	eris_psg_set_channel(1);
+	eris_psg_set_volume(0x00, 0, 0);
+	eris_psg_set_channel(2);
+	eris_psg_set_volume(0x00, 0, 0);
 
 	delay();
 	delay();
 
 	// Now make some noise
-	eris_low_psg_set_channel(5);
-	eris_low_psg_set_noise(0xF, 1);
-	eris_low_psg_set_balance(0xF, 0xF);
-	eris_low_psg_set_volume(0x1F, 1, 0);
+	eris_psg_set_channel(5);
+	eris_psg_set_noise(0xF, 1);
+	eris_psg_set_balance(0xF, 0xF);
+	eris_psg_set_volume(0x1F, 1, 0);
 
 	return 0;
 }
