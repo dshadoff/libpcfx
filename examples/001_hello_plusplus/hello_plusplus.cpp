@@ -9,6 +9,11 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+//-------------------------------------------------------------------------
+// This is a simple example which demontrates the use of C++
+// on the PC-FX, including how to compile and link.
+//-------------------------------------------------------------------------
+
 extern "C" {
 #include <string.h>
 

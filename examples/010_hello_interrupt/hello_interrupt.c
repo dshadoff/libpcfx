@@ -9,6 +9,12 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+//-------------------------------------------------------------------------
+// This example demonstrates implementing interrupt handlers
+// There is one handler for the VSync interrupt, and one for the TIMER
+// Both are set for approimately the same frequency
+//-------------------------------------------------------------------------
+
 /*
 The V810 back end supports these function attributes:
 __attribute__ ((interrupt))
@@ -23,9 +29,13 @@ is a leaf function (i.e. it doesn't call any other functions) or not.
 If it is a leaf function, then the handler only saves the registers that are
 actually used within the function itself, otherwise it must save all of the
 registers that might be overwritten when calling other functions.
+
+Note that variables accessed within an interrupt handler which are global
+(or otherwise shared) should also be marked as 'volatile' to force the
+optimizer to re-read the value when accessed (as an interrupt handler may
+have updated it).
 */
 
-// #include <stdlib.h>
 
 #include <stdarg.h>
 #include <stdio.h>
