@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 	for(i = 0x0; i < 0x1E00; i++) {
 		eris_king_kram_write(0);
 	}
-	printstr("FX-PAD Test", 12, 0x8, 1);
+	printstr("FX Controller Test", 7, 0x8, 1);
 
 	contrlr_pad_init(0);
 	for(;;) {
@@ -94,13 +94,13 @@ int main(int argc, char *argv[])
 		printstr("|  RUN |SELECT|   A  |   B  |", 0, 0x58, 0);
 		printstr("| TYPE |", 0, 0x68, 0);
 		padtype = contrlr_pad_type(0);
-		if(padtype == PAD_TYPE_NONE)
+		if(padtype == CONTRLR_TYPE_NONE)
 			printstr("| NONE |", 0, 0x70, 0);
-		else if(padtype == PAD_TYPE_MOUSE)
+		else if(padtype == CONTRLR_TYPE_MOUSE)
 			printstr("|MOUSE |", 0, 0x70, 0);
-		else if(padtype == PAD_TYPE_MULTITAP)
+		else if(padtype == CONTRLR_TYPE_MULTITAP)
 			printstr("|  TAP |", 0, 0x70, 0);
-		else if(padtype == PAD_TYPE_FXPAD)
+		else if(padtype == CONTRLR_TYPE_FXPAD)
 			printstr("|  PAD |", 0, 0x70, 0);
 		paddata = contrlr_pad_read(0);
 		for(i = 0; i < 16; i++) {

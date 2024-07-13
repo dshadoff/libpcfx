@@ -9,7 +9,7 @@ and       (C) 2024              Dave Shadoff  <GitHub ID: dshadoff>
 */
 
 /*****************************************************************************
- *  High-level pad control                                               []  *
+ *  High-level pad control                                                   *
  *****************************************************************************/
 	.global	_contrlr_pad_init
 	.global	_contrlr_pad_read
@@ -105,11 +105,11 @@ wait_for_input_ready:
         .global _contrlr_port_write_control
         .global _contrlr_port_write_data
 
-/*-----------------------------------*
- * void contrlr_port_init (int port)    *
- *                                   *
- * inputs: r6 = port                 *
- *-----------------------------------*/
+/*-------------------------------------*
+ * void contrlr_port_init (int port)   *
+ *                                     *
+ * inputs: r6 = port                   *
+ *-------------------------------------*/
 _contrlr_port_init:
         shl     7, r6           /* r6 will be either 0x00 or 0x80 = control port address */
         out.h   r0, 0[r6]
@@ -118,47 +118,47 @@ _contrlr_port_init:
         jmp     [lp]
 
 
-/*-------------------------------------*
- * u16 contrlr_port_read_status(int port) *
- *                                     *
- * inputs: r6  = port # (0 or 1)       *
- * output: r10 = status                *
- *-------------------------------------*/
+/*-----------------------------------------*
+ * u16 contrlr_port_read_status(int port)  *
+ *                                         *
+ * inputs: r6  = port # (0 or 1)           *
+ * output: r10 = status                    *
+ *-----------------------------------------*/
 _contrlr_port_read_status:
         shl     7, r6
         in.h    0[r6], r10
         jmp     [lp]
 
-/*-------------------------------------*
+/*----------------------------------------*
  * u32 contrlr_port_read_data(int port)   *
- *                                     *
- * inputs: r6  = port # (0 or 1)       *
- * output: r10 = data                  *
- *-------------------------------------*/
+ *                                        *
+ * inputs: r6  = port # (0 or 1)          *
+ * output: r10 = data                     *
+ *----------------------------------------*/
 _contrlr_port_read_data:
         shl     7, r6
         in.h    0x40[r6], r10
         jmp     [lp]
 
-/*-------------------------------------------------*
+/*----------------------------------------------------*
  * void contrlr_port_write_control(int port, u16 ctl) *
- *                                                 *
- * inputs: r6  = port # (0 or 1)                   *
- *         r7  = control value to write to port    *
- * output: (none)                                  *
- *-------------------------------------------------*/
+ *                                                    *
+ * inputs: r6  = port # (0 or 1)                      *
+ *         r7  = control value to write to port       *
+ * output: (none)                                     *
+ *----------------------------------------------------*/
 _contrlr_port_write_control:
         shl     7, r6
         out.h   r7, 0[r6]
         jmp     [lp]
 
-/*-------------------------------------------------*
+/*----------------------------------------------------*
  * void contrlr_port_write_data(int port, u32 data)   *
- *                                                 *
- * inputs: r6  = port # (0 or 1)                   *
- *         r7  = data value to write to port       *
- * output: (none)                                  *
- *-------------------------------------------------*/
+ *                                                    *
+ * inputs: r6  = port # (0 or 1)                      *
+ *         r7  = data value to write to port          *
+ * output: (none)                                     *
+ *----------------------------------------------------*/
 _contrlr_port_write_data:
         shl     7, r6
         out.w   r7, 0x40[r6]

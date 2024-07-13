@@ -50,10 +50,10 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 
 
 typedef enum {
-	PAD_TYPE_NONE = 0,
-	PAD_TYPE_MOUSE = 13,
-	PAD_TYPE_MULTITAP = 14,
-	PAD_TYPE_FXPAD = 15
+	CONTRLR_TYPE_NONE = 0,
+	CONTRLR_TYPE_MOUSE = 13,
+	CONTRLR_TYPE_MULTITAP = 14,
+	CONTRLR_TYPE_FXPAD = 15
 } pad_type;
 
 extern u32 contrlr_pad_values[];
@@ -69,8 +69,8 @@ extern u32 contrlr_pad_values[];
 #define contrlr_pad_type(x) (contrlr_pad_values[x] >> 28)
 #define contrlr_pad_connected(x) (contrlr_pad_type(x) != PAD_TYPE_NONE)
 
-#define mouse_x(x) ((contrlr_pad_values[x] >> 8) & 0xFF)
-#define mouse_y(x) ((contrlr_pad_values[x]) & 0xFF)
+#define contrlr_mouse_x(x) ((contrlr_pad_values[x] >> 8) & 0xFF)
+#define contrlr_mouse_y(x) ((contrlr_pad_values[x]) & 0xFF)
 
 // Normal sequence of operation:
 //
