@@ -17,11 +17,13 @@
 # Third digit = sequence 
 #
 #
-.PHONY: all 000_hello_newlib 001_hello_plusplus 002_hello_no_libc 010_hello_interrupt\
-     fxbmp fxpad cellophane psg bg7up spr7up scsi scsi_dma cd clean
+.PHONY: all 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
+     010_hello_interrupt 011_controller\
+     fxbmp cellophane psg bg7up spr7up scsi scsi_dma cd clean
 
-all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc 010_hello_interrupt\
-     fxbmp fxpad cellophane psg bg7up spr7up scsi scsi_dma 
+all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
+     010_hello_interrupt 011_controller\
+     fxbmp cellophane psg bg7up spr7up scsi scsi_dma 
 
 000_hello_newlib:
 	make -C $@
@@ -31,10 +33,10 @@ all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc 010_hello_interrupt\
 	make -C $@
 010_hello_interrupt:
 	make -C $@
+011_controller:
+	make -C $@
 
 fxbmp:
-	make -C $@
-fxpad:
 	make -C $@
 cellophane:
 	make -C $@
@@ -52,10 +54,10 @@ cd:
 	make -C 001_hello_plusplus cd
 	make -C 002_hello_no_libc cd
 	make -C 010_hello_interrupt cd
-	make -C fxpad cd
+	make -C 011_controller cd
+	make -C fxbmp cd
 	make -C bg7up cd
 	make -C spr7up cd
-	make -C fxbmp cd
 	make -C psg cd
 	make -C cellophane cd
 	make -C scsi cd
@@ -66,10 +68,10 @@ clean:
 	make -C 001_hello_plusplus clean
 	make -C 002_hello_no_libc clean
 	make -C 010_hello_interrupt clean
-	make -C fxpad clean
+	make -C 011_controller clean
+	make -C fxbmp clean
 	make -C bg7up clean
 	make -C spr7up clean
-	make -C fxbmp clean
 	make -C psg clean
 	make -C cellophane clean
 	make -C scsi clean

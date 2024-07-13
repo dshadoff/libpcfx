@@ -1,0 +1,7 @@
+binary ./out.bin
+name FX Controller Example
+maker dshadoff
+makerid TFX
+date 20240714
+country 1
+version 256
