@@ -13,17 +13,18 @@
 #    '4' = HuC6272 = King video processor, DMA engine, SCSI controller (CD)
 #    '5' = HuC6261 = palette control
 #    '6' = HuC6271 (Rainbow - MJPEG)
+#    '9' = filesys (Backup memory filesystem)
 #
 # Third digit = sequence 
 #
 #
 .PHONY: all 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
-     010_hello_interrupt 011_controller\
-     fxbmp cellophane psg bg7up spr7up scsi scsi_dma cd clean
+     010_hello_interrupt 011_controller 019_bkupmem\
+     bg7up spr7up cellophane psg scsi scsi_dma cd clean
 
 all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
-     010_hello_interrupt 011_controller\
-     fxbmp cellophane psg bg7up spr7up scsi scsi_dma 
+     010_hello_interrupt 011_controller 019_bkupmem\
+     bg7up spr7up cellophane psg scsi scsi_dma 
 
 000_hello_newlib:
 	make -C $@
@@ -35,9 +36,9 @@ all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
 	make -C $@
 011_controller:
 	make -C $@
-
-fxbmp:
+019_bkupmem:
 	make -C $@
+
 cellophane:
 	make -C $@
 psg:
@@ -55,7 +56,7 @@ cd:
 	make -C 002_hello_no_libc cd
 	make -C 010_hello_interrupt cd
 	make -C 011_controller cd
-	make -C fxbmp cd
+	make -C 019_bkupmem cd
 	make -C bg7up cd
 	make -C spr7up cd
 	make -C psg cd
@@ -69,7 +70,7 @@ clean:
 	make -C 002_hello_no_libc clean
 	make -C 010_hello_interrupt clean
 	make -C 011_controller clean
-	make -C fxbmp clean
+	make -C 019_bkupmem clean
 	make -C bg7up clean
 	make -C spr7up clean
 	make -C psg clean

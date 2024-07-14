@@ -9,15 +9,36 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
+// NOTE:
+// -----
+// The 'bkupmem' API only provide direct access to the backup memory
+// on the machine, and do not implement any measure for accessing
+// the files themselves (which are in FAT format).
+//
+// Furthermore, the PC-FXGA does NOT implement backup memory through
+// the same means, so these functions will have no effect on a
+// PC-FXGA.
+//
+// As such, these functions are NOT RECOMMENDED for general use.
+//
+// The FX BIOS implements correct file management measures which
+// will work across both machines, and work at a filesystem level.
+//
+// A 'C' language interface to these functions will be implemented
+// as part of libpcfx in the near future, as "filesys.h". As this
+// interface has some complexities, there will be several examples
+// in order to demonstrate how to use the functions
+//
+
 #include <string.h>
 
 #include <pcfx/types.h>
 #include <pcfx/v810.h>
 #include <pcfx/romfont.h>
+#include <pcfx/bkupmem.h>
 
 #include <eris/king.h>
 #include <eris/tetsu.h>
-#include <eris/bkupmem.h>
 
 void printch(u32 sjis, u32 kram, int tall);
 void printstr(const char* str, int x, int y, int tall);
@@ -73,16 +94,16 @@ int main(int argc, char *argv[])
 	eris_king_set_kram_write(0, 1);
 	printstr("Backup Memory", 8, 2, 1);
 
-	eris_bkupmem_set_access(1, 1);
-	eris_bkupmem_read(0, tmpbuf, 0, 0x40);
+	bkupmem_set_access(1, 1);
+	bkupmem_read(0, tmpbuf, 0, 0x40);
 	printhex(tmpbuf, 0, 0x60, 0x40, 1, 0);
-	eris_bkupmem_read(1, tmpbuf, 0, 0x40);
+	bkupmem_read(1, tmpbuf, 0, 0x40);
 	printhex(tmpbuf, 0, 0xA0, 0x40, 1, 0);
 
 	printstr("Checking memory sizes...", 0, 0x22, 0);
 
-	eris_bkupmem_read(0, tmpbuf, 0x13, 2);
-	eris_bkupmem_read(0, tmpbuf + 2, 0xB, 2);
+	bkupmem_read(0, tmpbuf, 0x13, 2);
+	bkupmem_read(0, tmpbuf + 2, 0xB, 2);
 
 	u16_ptr = (u16*)(tmpbuf + 2);
 	bps[0] = *u16_ptr;
@@ -93,8 +114,8 @@ int main(int argc, char *argv[])
 	bps[0] = ((bps[0] & 0x00FF) << 8) | ((bps[0] & 0xFF00) >> 8);
 	sects[0] = ((sects[0] & 0x00FF) << 8) | ((sects[0] & 0xFF00) >> 8);
 
-	eris_bkupmem_read(1, tmpbuf, 0x13, 2);
-	eris_bkupmem_read(1, tmpbuf + 2, 0xB, 2);
+	bkupmem_read(1, tmpbuf, 0x13, 2);
+	bkupmem_read(1, tmpbuf + 2, 0xB, 2);
 
 	u16_ptr = (u16*)(tmpbuf + 2);
 	bps[1] = *u16_ptr;
