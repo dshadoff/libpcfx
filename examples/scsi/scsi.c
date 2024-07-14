@@ -12,10 +12,11 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <string.h>
 
 #include <pcfx/types.h>
-#include <eris/v810.h>
+#include <pcfx/v810.h>
+#include <pcfx/romfont.h>
+
 #include <eris/king.h>
 #include <eris/tetsu.h>
-#include <eris/romfont.h>
 #include <eris/cd.h>
 #include <pcfx/contrlr.h>
 #include <eris/scsi.h>
@@ -194,7 +195,7 @@ void printch(u32 sjis, u32 kram, int tall)
 {
 	u16 px;
 	int x, y;
-	u8* glyph = eris_romfont_get(sjis, tall ? ROMFONT_ANK_8x16 : ROMFONT_ANK_8x8);
+	u8* glyph = romfont_get(sjis, tall ? ROMFONT_ANK_8x16 : ROMFONT_ANK_8x8);
 	for(y = 0; y < (tall ? 16 : 8); y++) {
 		eris_king_set_kram_write(kram + (y << 5), 1);
 		px = 0;

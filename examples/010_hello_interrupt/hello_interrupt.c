@@ -43,11 +43,11 @@ have updated it).
 
 #include <pcfx/types.h>
 #include <pcfx/timer.h>
+#include <pcfx/v810.h>
+#include <pcfx/romfont.h>
 
-#include <eris/v810.h>
 #include <eris/king.h>
 #include <eris/tetsu.h>
-#include <eris/romfont.h>
 
 const int __attribute__ ((zda)) zda_constant         = 0xDEADBEEF;
 volatile int __attribute__ ((zda)) zda_initialized   = 0x12345678;
@@ -228,7 +228,7 @@ void printch(u32 sjis, u32 kram, int tall)
 {
 	u16 px;
 	int x, y;
-	u8* glyph = eris_romfont_get(sjis, tall ? ROMFONT_ANK_8x16 : ROMFONT_ANK_8x8);
+	u8* glyph = romfont_get(sjis, tall ? ROMFONT_ANK_8x16 : ROMFONT_ANK_8x8);
 	for(y = 0; y < (tall ? 16 : 8); y++) {
 		eris_king_set_kram_write(kram + (y << 5), 1);
 		px = 0;

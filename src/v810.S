@@ -1,14 +1,16 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff <GitHub user: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 */
 
 /*****************************************************************************
- *  Cache functions                                                     []   *
+ *  Cache functions                                                          *
  *****************************************************************************/
 	.global _cache_enable
 	.global	_cache_disable
@@ -16,12 +18,22 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 	.global _cache_dump
 	.global _cache_restore
 
+/*----------------------------------*
+ * void cache_enable(void)          *
+ *                                  *
+ * inputs: none                     *
+ *----------------------------------*/
 _cache_enable:
 	stsr	CHCW, r10
 	ori	2, r10, r10
 	ldsr	r10, CHCW
 	jmp	[lp]
 
+/*----------------------------------*
+ * void cache_disable(void)         *
+ *                                  *
+ * inputs: none                     *
+ *----------------------------------*/
 _cache_disable:
 	mov	~2, r11
 	stsr	CHCW, r10
@@ -29,6 +41,13 @@ _cache_disable:
 	ldsr	r10, CHCW
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void cache_clear(int entry, int count)                        *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = entry: First entry in the cache to clear. (0 ~ 127)     *
+ *  r7 = count: # of entries to clear from the cache. (1 ~ 128)  *
+ *---------------------------------------------------------------*/
 _cache_clear:
 	stsr	CHCW, r10
 	shl	8, r7
@@ -39,6 +58,13 @@ _cache_clear:
 	ldsr	r10, CHCW
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void cache_dump(void* dumpaddr)                               *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = dumpaddr: Memory to dump cache into                     *
+ *       Must be 256-byte aligned                                *
+ *---------------------------------------------------------------*/
 _cache_dump:
 	stsr	CHCW, r10
 	shl	8, r6
@@ -47,6 +73,13 @@ _cache_dump:
 	ldsr	r10, CHCW
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void cache_restore(void* restaddr)                            *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = dumpaddr: Memory to restore cache from                  *
+ *       Must be 256-byte aligned                                *
+ *---------------------------------------------------------------*/
 _cache_restore:
 	stsr	CHCW, r10
 	shl	8, r6
@@ -142,6 +175,16 @@ _irq_shim_addr:
 _irq_handlers:
 	.long	0,0,0,0, 0,0,0,0
 
+/*---------------------------------------------------------------*
+ * int irq_enable(void)                                          *
+ *                                                               *
+ * inputs:                                                       *
+ *  None                                                         *
+ *                                                               *
+ * returns:                                                      *
+ *  r10: Returns whether or not IRQs were enabled before.        *
+ *    (Pass to irq_restore to restore state)                     *
+ *---------------------------------------------------------------*/
 _irq_enable:
 	stsr	PSW, r10
 	movea	0x1000, r0, r12
@@ -152,6 +195,16 @@ _irq_enable:
 	ldsr	r11, PSW
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * int irq_disable(void)                                         *
+ *                                                               *
+ * inputs:                                                       *
+ *  None                                                         *
+ *                                                               *
+ * returns:                                                      *
+ *  r10: Returns whether or not IRQs were enabled before.        *
+ *    (Pass to irq_restore to restore state)                     *
+ *---------------------------------------------------------------*/
 _irq_disable:
 	stsr	PSW, r10
 	movea	0x1000, r0, r11
@@ -159,7 +212,14 @@ _irq_disable:
 	or	r10, r11
 	ldsr	r11, PSW
 	jmp	[lp]
-
+ 
+/*---------------------------------------------------------------*
+ * void irq_restore(int on)                                      *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = on: whether to restore irqs (compatible with            *
+ *           irq_enable and irq_disable)                         *
+ *---------------------------------------------------------------*/
 _irq_restore:
 	andi	1, r6, r6
 	movea	0x1000, r0, r11
@@ -171,6 +231,13 @@ _irq_restore:
 	ldsr	r11, PSW
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void irq_set_level(int lv)                                    *
+ *    Set minimum maskable interrupt level                       *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = lv: Minimum V810 maskable interrupt level. (0 ~ 15)     *
+ *---------------------------------------------------------------*/
 _irq_set_level:
 	stsr	PSW, r10
 	andi	0xF, r6, r6
@@ -182,10 +249,26 @@ _irq_set_level:
 	ldsr	r12, PSW
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void irq_set_mask(int mask)                                   *
+ *    Sets interrupt masking for interrupt levels 8 ~ 15.        *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = mask: The mask on levels. bit0 is level 15,             *
+ *             bit 7 is level 8, etc.                            *
+ *---------------------------------------------------------------*/
 _irq_set_mask:
 	out.h	r6, 0xE40[r0]
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void irq_set_priority(u32 prio)                               *
+ *    Sets interrupt priorities for interrupt levels 8 ~ 15.     *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = prio: Priority for levels. Each level gets 3 bits, with *
+ *             bit0~2 being level 15, and bit29~31 is level 8.   *
+ *---------------------------------------------------------------*/
 _irq_set_priority:
 	mov	r6, r11
 	shr	16, r11
@@ -193,6 +276,15 @@ _irq_set_priority:
 	out.h	r6, 0xE80[r0]
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void irq_set_handler(int level, void (*fn)(void))             *
+ *    Set an IRQ handler function                                *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = level: The level that this handler will correspond to.  *
+ *  r7 = fn:    Handler function to be run when an interrupt     *
+ *              with the correct level is signaled.              *
+ *---------------------------------------------------------------*/
 _irq_set_handler:
 	addi	-7, r6, r6
 	shl	2, r6
@@ -217,16 +309,44 @@ _irq_set_handler:
 	movea	128, r0, r7
 	jr	_cache_clear
 
+/*---------------------------------------------------------------*
+ * int irq_get_level(void)                                       *
+ *                                                               *
+ * inputs:                                                       *
+ *  None                                                         *
+ *                                                               *
+ * returns:                                                      *
+ *  r10: Current/minimum maskable interrupt level.               *
+ *---------------------------------------------------------------*/
 _irq_get_level:
 	stsr	PSW, r10
 	movhi	0xF, r0, r11
 	and	r11, r10
 	jmp	[lp]
 
+/*--------------------------------------------------------------------*
+ * int irq_get_mask(void)                                             *
+ *                                                                    *
+ * inputs:                                                            *
+ *  None                                                              *
+ *                                                                    *
+ * returns:                                                           *
+ *  r10: The mask on levels. bit0 is level 8, bit 7 is level 15, etc. *
+ *--------------------------------------------------------------------*/
 _irq_get_mask:
 	in.h	0xE40[r0], r10
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * int irq_get_priority(void)                                    *
+ *                                                               *
+ * inputs:                                                       *
+ *  None                                                         *
+ *                                                               *
+ * returns:                                                      *
+ *  r10: The priority for levels. Each level gets 3 bits, with   *
+ *       bit0~2 being level 15, and bit29~31 is level 8.         *
+ *---------------------------------------------------------------*/
 _irq_get_priority:
 	in.h	0xEC0[r0], r11
 	shl	16, r11
@@ -234,6 +354,13 @@ _irq_get_priority:
 	or	r11, r10
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void irq_level_enable(int level)                              *
+ *    Sets mask to add allowing a single level.                  *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = level: The level to enable                              *
+ *---------------------------------------------------------------*/
 _irq_level_enable:
 	in.h	0xE40[r0], r10
 	add	-8, r6
@@ -243,6 +370,13 @@ _irq_level_enable:
 	out.h	r10, 0xE40[r0]
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void irq_level_disable(int level)                             *
+ *    Sets mask to remove allowing a single level.               *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = level: The level to disable                             *
+ *---------------------------------------------------------------*/
 _irq_level_disable:
 	in.h	0xE40[r0], r10
 	add	-8, r6
@@ -252,6 +386,16 @@ _irq_level_disable:
 	out.h	r10, 0xE40[r0]
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void irq_set_raw_handler(int level, void (*fn)(void))         *
+ *    Set an IRQ handler function                                *
+ *    This is not wrapped, and so must be written in assembly.   *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = level: The level that this handler will correspond to.  *
+ *  r7 = fn:    Handler function to be run when an interrupt     *
+ *              with the correct level is signaled.              *
+ *---------------------------------------------------------------*/
 _irq_set_raw_handler:
 	addi	-7, r6, r6
 	shl	2, r6
@@ -279,26 +423,74 @@ _irq_set_raw_handler:
 	.global _in16
 	.global _in8
 
+/*---------------------------------------------------------------*
+ * void out32(u32 port, u32 data)                                *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = port:  Port to output to.                               *
+ *  r7 = data:  Data to be output through the port.              *
+ *---------------------------------------------------------------*/
 _out32:
 	out.w	r7, 0[r6]
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void out16(u32 port, u16 data)                                *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = port:  Port to output to.                               *
+ *  r7 = data:  Data to be output through the port.              *
+ *---------------------------------------------------------------*/
 _out16:
 	out.h	r7, 0[r6]
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * void out8(u32 port, u8 data)                                  *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = port:  Port to output to.                               *
+ *  r7 = data:  Data to be output through the port.              *
+ *---------------------------------------------------------------*/
 _out8:
 	out.b	r7, 0[r6]
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * u32 in32(u32 port)                                            *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = port:  Port to output to.                               *
+ *                                                               *
+ * outputs:                                                      *
+ *  r10 :  Data input from the port.                             *
+ *---------------------------------------------------------------*/
 _in32:
 	in.w	0[r6], r10
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * u16 in16(u32 port)                                            *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = port:  Port to output to.                               *
+ *                                                               *
+ * outputs:                                                      *
+ *  r10 :  Data input from the port.                             *
+ *---------------------------------------------------------------*/
 _in16:
 	in.h	0[r6], r10
 	jmp	[lp]
 
+/*---------------------------------------------------------------*
+ * u8 in8(u32 port)                                              *
+ *                                                               *
+ * inputs:                                                       *
+ *  r6 = port:  Port to output to.                               *
+ *                                                               *
+ * outputs:                                                      *
+ *  r10 :  Data input from the port.                             *
+ *---------------------------------------------------------------*/
 _in8:
 	in.b	0[r6], r10
 	jmp	[lp]
