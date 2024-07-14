@@ -1,7 +1,9 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff  <GitHub ID: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
@@ -10,25 +12,25 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 /*****************************************************************************
  *  Low-level 7up functions                                              []  *
  *****************************************************************************/
-	.global	_eris_low_sup_init
-	.global	_eris_low_sup_setreg
-	.global	_eris_low_sup_set_video_mode
-	.global	_eris_low_sup_get_video_mode
-	.global	_eris_low_sup_set_vram_write
-	.global	_eris_low_sup_vram_write
-	.global	_eris_low_sup_set_vram_read
-	.global	_eris_low_sup_vram_read
-	.global	_eris_low_sup_set_control
-	.global	_eris_low_sup_get_control
-	.global	_eris_low_sup_set_interrupts
-	.global _eris_low_sup_set_interrupt_raster
-	.global _eris_low_sup_set_scroll
-	.global _eris_low_sup_get_scroll
-	.global	_eris_low_sup_do_dma
-	.global	_eris_low_sup_setup_dma
-	.global	_eris_low_sup_set_satb_address
-	.global	_eris_low_sup_set_access_width
-	.global	_eris_low_sup_get_access_width
+	.global	_low_sup_init
+	.global	_low_sup_setreg
+	.global	_low_sup_set_video_mode
+	.global	_low_sup_get_video_mode
+	.global	_low_sup_set_vram_write
+	.global	_low_sup_vram_write
+	.global	_low_sup_set_vram_read
+	.global	_low_sup_vram_read
+	.global	_low_sup_set_control
+	.global	_low_sup_get_control
+	.global	_low_sup_set_interrupts
+	.global _low_sup_set_interrupt_raster
+	.global _low_sup_set_scroll
+	.global _low_sup_get_scroll
+	.global	_low_sup_do_dma
+	.global	_low_sup_setup_dma
+	.global	_low_sup_set_satb_address
+	.global	_low_sup_set_access_width
+	.global	_low_sup_get_access_width
 
 .macro	set_rrg	reg, ch, tmp
 	movea	0x400, \ch, \tmp
@@ -40,7 +42,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 	set_rrg	\tmp2, \ch, \tmp1
 .endm
 
-_eris_low_sup_init:
+_low_sup_init:
 	shl	8, r6
 	set_reg	0, r6, r10, r11
 	out.h	r0, 4[r10]
@@ -66,13 +68,13 @@ _eris_low_sup_init:
 	bne	2b
 	jmp	[lp]
 
-_eris_low_sup_setreg:
+_low_sup_setreg:
 	shl	8, r6
 	set_rrg	r7, r6, r10
 	out.h	r8, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_set_video_mode:
+_low_sup_set_video_mode:
 	shl	8, r6
 	ld.w	0[sp], r10
 	ld.w	4[sp], r11
@@ -97,7 +99,7 @@ _eris_low_sup_set_video_mode:
 	out.h	r14, 4[r15]
 	jmp	[lp]
 
-_eris_low_sup_get_video_mode:
+_low_sup_get_video_mode:
 	shl	8, r6
 	ld.w	0[sp], r10
 	ld.w	4[sp], r11
@@ -137,7 +139,7 @@ _eris_low_sup_get_video_mode:
 	jmp	[lp]
 
 /* This will eventually be the set video mode in the high level */
-_eris_7up_set_video_mode:
+_7up_set_video_mode:
 	shl	8, r6
 	set_reg	0xA, r6, r10, r11
 	movea	0x202, r0, r12
@@ -170,31 +172,31 @@ _eris_7up_set_video_mode:
 	out.h	r13, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_set_vram_write:
+_low_sup_set_vram_write:
 	shl	8, r6
 	set_rrg	r0, r6, r10
 	out.h	r7, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_vram_write:
+_low_sup_vram_write:
 	shl	8, r6
 	set_reg	2, r6, r10, r11
 	out.h	r7, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_set_vram_read:
+_low_sup_set_vram_read:
 	shl	8, r6
 	set_reg	1, r6, r10, r11
 	out.h	r7, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_vram_read:
+_low_sup_vram_read:
 	shl	8, r6
 	set_reg	2, r6, r10, r11
 	in.h	4[r10], r10
 	jmp	[lp]
 
-_eris_low_sup_set_control:
+_low_sup_set_control:
 	shl	8, r6
 	set_reg	5, r6, r10, r11
 	in.h	4[r10], r12
@@ -208,7 +210,7 @@ _eris_low_sup_set_control:
 	out.h	r7, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_get_control:
+_low_sup_get_control:
 	shl	8, r6
 	set_reg	5, r6, r10, r11
 	in.h	4[r10], r12
@@ -225,7 +227,7 @@ _eris_low_sup_get_control:
 	st.w	r12, 0[r9]
 	jmp	[lp]
 
-_eris_low_sup_set_interrupts:
+_low_sup_set_interrupts:
 	ld.w	0[sp], r13
 	shl	8, r6
 	set_reg	5, r6, r10, r11
@@ -241,13 +243,13 @@ _eris_low_sup_set_interrupts:
 	out.h	r13, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_set_interrupt_raster:
+_low_sup_set_interrupt_raster:
 	shl	8, r6
 	set_reg	6, r6, r10, r11
 	out.h	r7, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_set_scroll:
+_low_sup_set_scroll:
 	shl	8, r6
 	set_reg	7, r6, r10, r11
 	out.h	r7, 4[r10]
@@ -255,7 +257,7 @@ _eris_low_sup_set_scroll:
 	out.h	r8, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_get_scroll:
+_low_sup_get_scroll:
 	shl	8, r6
 	set_reg	7, r6, r10, r11
 	in.h	4[r10], r11
@@ -265,7 +267,7 @@ _eris_low_sup_get_scroll:
 	st.h	r11, 0[r8]
 	jmp	[lp]
 
-_eris_low_sup_do_dma:
+_low_sup_do_dma:
 	shl	8, r6
 	set_reg	16, r6, r10, r11
 	out.h	r7, 4[r10]
@@ -275,7 +277,7 @@ _eris_low_sup_do_dma:
 	out.h	r9, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_setup_dma:
+_low_sup_setup_dma:
 	ld.w	0[sp], r10
 	ld.w	4[sp], r11
 	shl	8, r6
@@ -291,13 +293,13 @@ _eris_low_sup_setup_dma:
 	out.h	r7, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_set_satb_address:
+_low_sup_set_satb_address:
 	shl	8, r6
 	set_reg	19, r6, r10, r11
 	out.h	r7, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_set_access_width:
+_low_sup_set_access_width:
 	shl	8, r6
 	set_reg	9, r6, r10, r11
 	ld.w	0[sp], r12
@@ -310,7 +312,7 @@ _eris_low_sup_set_access_width:
 	out.h	r7, 4[r10]
 	jmp	[lp]
 
-_eris_low_sup_get_access_width:
+_low_sup_get_access_width:
 	shl	8, r6
 	ld.w	0[sp], r10
 	set_reg	9, r6, r11, r12

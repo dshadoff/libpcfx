@@ -34,8 +34,8 @@ int main(int argc, char *argv[])
 	int i;
 	u16 microprog[16];
 
-	eris_low_sup_init(0);
-	eris_low_sup_init(1);
+	low_sup_init(0);
+	low_sup_init(1);
 	king_init();
 	tetsu_init();
 	
@@ -71,10 +71,10 @@ int main(int argc, char *argv[])
 	king_set_bat_cg_addr(KING_BG0SUB, 0, 0);
 	king_set_scroll(KING_BG0, 0, 0);
 	king_set_bg_size(KING_BG0, KING_BGSIZE_256, KING_BGSIZE_256, KING_BGSIZE_256, KING_BGSIZE_256);
-	eris_low_sup_set_control(0, 0, 1, 0);
-	eris_low_sup_set_access_width(0, 0, SUP_LOW_MAP_32X32, 0, 0);
-	eris_low_sup_set_scroll(0, 0, 0);
-	eris_low_sup_set_video_mode(0, 2, 2, 4, 0x1F, 0x11, 2, 239, 2);
+	low_sup_set_control(0, 0, 1, 0);
+	low_sup_set_access_width(0, 0, SUP_LOW_MAP_32X32, 0, 0);
+	low_sup_set_scroll(0, 0, 0);
+	low_sup_set_video_mode(0, 2, 2, 4, 0x1F, 0x11, 2, 239, 2);
 
 	king_set_kram_read(0, 1);
 	king_set_kram_write(0, 1);
@@ -86,22 +86,22 @@ int main(int argc, char *argv[])
 
 	// set up the BAT (background attribute table
 	//
-	eris_low_sup_set_vram_write(0, 0);
+	low_sup_set_vram_write(0, 0);
 	for(i = 0; i < (32 * 5); i++) {           /* First 5 lines need to be blank, to avoid covering the title */
-		eris_low_sup_vram_write(0, 0x80); /* All tiles are at tile 0x80 (blank) */
+		low_sup_vram_write(0, 0x80); /* All tiles are at tile 0x80 (blank) */
 	}
 	for(i = (32 * 5); i < 0x800; i++) {       /* Everything after first 5 lines */
-		eris_low_sup_vram_write(0, 0x81); /* All tiles are at tile 0x81 */
+		low_sup_vram_write(0, 0x81); /* All tiles are at tile 0x81 */
 	}
 
 	// set up the character tile definitiions for the two tiles
 	// referenced by the BAT above (one blank, one with a pattern)
 	//
 	for(i = 0; i < 16; i++) {
-		eris_low_sup_vram_write(0, 0x00); /* Blank tile */
+		low_sup_vram_write(0, 0x00); /* Blank tile */
 	}
 	for(i = 0; i < 16; i++) {
-		eris_low_sup_vram_write(0, char_gfx[i]); /* happyface type logo defined above */
+		low_sup_vram_write(0, char_gfx[i]); /* happyface type logo defined above */
 	}
 
 	king_set_kram_write(0, 1);
