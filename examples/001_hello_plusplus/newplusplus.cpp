@@ -2,7 +2,7 @@
 
 extern "C" void dbgfatal (void);
 
-extern "C" void* eris_new (unsigned len)
+extern "C" void* pcfx_new (unsigned len)
 {
   void *p = malloc( len );
   if (p == 0)
@@ -13,13 +13,13 @@ extern "C" void* eris_new (unsigned len)
   return p;
 }
 
-extern "C" void eris_delete (void * p)
+extern "C" void pcfx_delete (void * p)
 {
   free(p);
 }
 
-void * operator new      (unsigned len) __attribute__((alias("eris_new")));
-void * operator new[]    (unsigned len) __attribute__((alias("eris_new")));   
-void   operator delete   (void* p)      __attribute__((alias("eris_delete")));
-void   operator delete[] (void* p)      __attribute__((alias("eris_delete")));
+void * operator new      (unsigned len) __attribute__((alias("pcfx_new")));
+void * operator new[]    (unsigned len) __attribute__((alias("pcfx_new")));   
+void   operator delete   (void* p)      __attribute__((alias("pcfx_delete")));
+void   operator delete[] (void* p)      __attribute__((alias("pcfx_delete")));
 void * __cxa_pure_virtual = 0;

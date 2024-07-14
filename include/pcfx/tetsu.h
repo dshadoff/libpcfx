@@ -1,7 +1,9 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff  <GitHub ID: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
@@ -11,8 +13,8 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
  * \brief Controls the NEW Iron Guanyin (Tetsu kannon) chip (Video Controller)
  */
 
-#ifndef _LIBERIS_TETSU_H_
-#define _LIBERIS_TETSU_H_
+#ifndef _LIBPCFX_TETSU_H_
+#define _LIBPCFX_TETSU_H_
 
 #include <pcfx/types.h>
 
@@ -50,7 +52,7 @@ typedef enum {
 
 /*! \brief Initialize the NEW Iron Guanyin.
  */
-void eris_tetsu_init();
+void tetsu_init();
 /*! \brief Setup the video mode.
  *
  * \param lines Vertical line mode.
@@ -66,7 +68,7 @@ void eris_tetsu_init();
  * \param bg3_disp Whether KING BG3 is displayed.
  * \param rainbow_disp Whether the RAINBOW output is displayed.
  */
-void eris_tetsu_set_video_mode(tetsu_lines lines, int ext_sync,
+void tetsu_set_video_mode(tetsu_lines lines, int ext_sync,
 			tetsu_dotclock dotclock, tetsu_colordepth bg_depth,
 			tetsu_colordepth spr_depth, int bg7up_show,
 			int spr7up_show, int bg0_disp, int bg1_disp,
@@ -76,7 +78,7 @@ void eris_tetsu_set_video_mode(tetsu_lines lines, int ext_sync,
  * \param pal_entry Which palette entry to set the color of.
  * \param color The color to set. In Y8U4V4 format.
  */
-void eris_tetsu_set_palette(u16 pal_entry, u16 color);
+void tetsu_set_palette(u16 pal_entry, u16 color);
 /*! \brief Which palette to use for the 7up chips.
  *
  * Palettes are actually indexes into the palette which is the first color
@@ -85,7 +87,7 @@ void eris_tetsu_set_palette(u16 pal_entry, u16 color);
  * \param bg7up Which palette to use for 7up backgrounds.
  * \param spr7up Which palette to use for 7up sprites.
  */
-void eris_tetsu_set_7up_palette(u16 bg7up, u16 spr7up);
+void tetsu_set_7up_palette(u16 bg7up, u16 spr7up);
 /*! \brief Which palette to use for the KING backgrounds.
  *
  * Palettes are actually indexes into the palette which is the first color
@@ -96,7 +98,7 @@ void eris_tetsu_set_7up_palette(u16 bg7up, u16 spr7up);
  * \param bg2 Which palette to use for KING background 2.
  * \param bg3 Which palette to use for KING background 3.
  */
-void eris_tetsu_set_king_palette(u16 bg0, u16 bg1, u16 bg2, u16 bg3);
+void tetsu_set_king_palette(u16 bg0, u16 bg1, u16 bg2, u16 bg3);
 /*! \brief Which palette to use for RAIBOW.
  *
  * Palettes are actually indexes into the palette which is the first color
@@ -104,7 +106,7 @@ void eris_tetsu_set_king_palette(u16 bg0, u16 bg1, u16 bg2, u16 bg3);
  * be color 0, 5th would be 1, etc.
  * \param rainbow Which palette to use for RAIBOW.
  */
-void eris_tetsu_set_rainbow_palette(u16 rainbow);
+void tetsu_set_rainbow_palette(u16 rainbow);
 /*! \brief Set layer priorities.
  *
  * \param bg7up Priority for the 7up backgrounds. (0 ~ 7)
@@ -115,7 +117,7 @@ void eris_tetsu_set_rainbow_palette(u16 rainbow);
  * \param bg3 Priority for KING BG3. (0 ~ 7)
  * \param rainbow Priority for RAINBOW. (0 ~ 7)
  */
-void eris_tetsu_set_priorities(u8 bg7up, u8 spr7up, u8 bg0, u8 bg1, u8 bg2,
+void tetsu_set_priorities(u8 bg7up, u8 spr7up, u8 bg0, u8 bg1, u8 bg2,
 				u8 bg3, u8 rainbow);
 /*! \brief Set chroma color key values.
  *
@@ -127,36 +129,36 @@ void eris_tetsu_set_priorities(u8 bg7up, u8 spr7up, u8 bg0, u8 bg1, u8 bg2,
  * \param maxv Maximum V.
  * \param minv Minimum V.
  */
-void eris_tetsu_set_chroma_key(u8 maxy, u8 miny, u8 maxu, u8 minu,
+void tetsu_set_chroma_key(u8 maxy, u8 miny, u8 maxu, u8 minu,
 				u8 maxv, u8 minv);
 /*! \brief Get the current raster.
  *
  * \return Current raster.
  */
-int eris_tetsu_get_raster(void);
+int tetsu_get_raster(void);
 /*! \brief Check which field is being displayed for interlaced mode.
  *
  * \return 1 if displaying odd field, 0 for even field.
  */
-int eris_tetsu_get_field(void);
+int tetsu_get_field(void);
 /*! \brief Checks if we are currently displaying (not in H or V blank)
  *
  * \return 1 if we are displaying, 0 for in blank.
  */
-int eris_tetsu_is_displaying(void);
+int tetsu_is_displaying(void);
 /*! \brief Sets the constant color for the cellophane.
  *
  * This color is either the color of the cellophane (in the case of it being
  * in front) or the color of the background (in the case of it being in back).
  * \param color Color in Y8U4V4 format.
  */
-void eris_tetsu_set_cellophane_color(u16 color);
+void tetsu_set_cellophane_color(u16 color);
 /*! \brief Sets cellophane activity on sprites.
  *
  * \param banks A 16-element array of 1s or 0s that contains whether that color
  *              palette bank receives cellophane treatment.
  */
-void eris_tetsu_set_cellophane_sprites(int* banks); /* 16 element array */
+void tetsu_set_cellophane_sprites(int* banks); /* 16 element array */
 /*! \brief Set cellophane control.
  *
  * \param enable Whether the cellophane is being used or not.
@@ -170,7 +172,7 @@ void eris_tetsu_set_cellophane_sprites(int* banks); /* 16 element array */
  * \param bg3 Which coefficient to use for KING BG3.
  * \param rainbow Which coefficient to use for RAINBOW output.
  */
-void eris_tetsu_set_cellophane_control(int enable, int in_front,
+void tetsu_set_cellophane_control(int enable, int in_front,
 				tetsu_coeff bg7up, tetsu_coeff spr7up,
 				tetsu_coeff bg0, tetsu_coeff bg1,
 				tetsu_coeff bg2, tetsu_coeff bg3,
@@ -186,7 +188,7 @@ void eris_tetsu_set_cellophane_control(int enable, int in_front,
  * \param bu U component of the B coefficient.
  * \param bv V component of the B coefficient.
  */
-void eris_tetsu_set_cellophane_coeffs(int coeff, u8 ay, u8 au, u8 av,
+void tetsu_set_cellophane_coeffs(int coeff, u8 ay, u8 au, u8 av,
 				u8 by, u8 bu, u8 bv);
 
 #endif

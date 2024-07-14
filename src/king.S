@@ -1,7 +1,9 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff  <GitHub ID: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
@@ -10,21 +12,21 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 /*****************************************************************************
  * HuC6272 (KING) functions                                              []  *
  *****************************************************************************/
-	.global	_eris_king_init
-	.global	_eris_king_set_kram_read
-	.global	_eris_king_set_kram_write
-	.global	_eris_king_kram_read
-	.global	_eris_king_kram_write
-	.global	_eris_king_set_kram_pages
-	.global	_eris_king_set_bg_mode
-	.global	_eris_king_set_bg_prio
-	.global	_eris_king_set_bg_size
-	.global	_eris_king_set_bat_cg_addr
-	.global	_eris_king_set_scroll
-	.global _eris_king_write_microprogram
-	.global _eris_king_fill_microprogram
-	.global	_eris_king_enable_microprogram
-	.global _eris_king_disable_microprogram
+	.global	_king_init
+	.global	_king_set_kram_read
+	.global	_king_set_kram_write
+	.global	_king_kram_read
+	.global	_king_kram_write
+	.global	_king_set_kram_pages
+	.global	_king_set_bg_mode
+	.global	_king_set_bg_prio
+	.global	_king_set_bg_size
+	.global	_king_set_bat_cg_addr
+	.global	_king_set_scroll
+	.global _king_write_microprogram
+	.global _king_fill_microprogram
+	.global	_king_enable_microprogram
+	.global _king_disable_microprogram
 
 .macro	set_rrg	reg
 	out.h	\reg, 0x600[r0]
@@ -35,7 +37,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 	set_rrg	\tmp
 .endm
 
-_eris_king_init:
+_king_init:
 	mov	1, r10
 1:	mov	r10, r11
 	shl	31, r11
@@ -62,31 +64,31 @@ _eris_king_init:
 	out.h	r0, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_set_kram_read:
+_king_set_kram_read:
 	shl	18, r7
 	set_reg	0xC, r10
 	or	r7, r6
 	out.w	r6, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_set_kram_write:
+_king_set_kram_write:
 	shl	18, r7
 	set_reg	0xD, r10
 	or	r7, r6
 	out.w	r6, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_kram_read:
+_king_kram_read:
 	set_reg	0xE, r10
 	in.h	0x604[r0], r10
 	jmp	[lp]
 
-_eris_king_kram_write:
+_king_kram_write:
 	set_reg	0xE, r10
 	out.h	r6, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_set_kram_pages:
+_king_set_kram_pages:
 	set_reg	0xF, r10
 	shl	8, r7
 	shl	16, r8
@@ -97,7 +99,7 @@ _eris_king_set_kram_pages:
 	out.w	r6, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_set_bg_mode:
+_king_set_bg_mode:
 	set_reg	0x10, r10
 	shl	4, r7
 	shl	8, r8
@@ -108,7 +110,7 @@ _eris_king_set_bg_mode:
 	out.h	r6, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_set_bg_prio:
+_king_set_bg_prio:
 	set_reg	0x12, r10
 	ld.w	0[sp], r11
 	shl	3, r7
@@ -122,7 +124,7 @@ _eris_king_set_bg_prio:
 	out.h	r6, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_set_bg_size:
+_king_set_bg_size:
 	ld.w	0[sp], r10
 	shl	4, r8
 	shl	8, r9
@@ -139,7 +141,7 @@ _eris_king_set_bg_size:
 	out.h	r7, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_set_bat_cg_addr:
+_king_set_bat_cg_addr:
 	movea	0x20, r0, r10
 	shl	1, r6
 	add	r10, r6
@@ -150,7 +152,7 @@ _eris_king_set_bat_cg_addr:
 	out.h	r8, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_set_scroll:
+_king_set_scroll:
 	movea	0x30, r0, r10
 	cmp	0, r6
 	be	1f
@@ -164,7 +166,7 @@ _eris_king_set_scroll:
 	out.h	r8, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_write_microprogram:
+_king_write_microprogram:
 	set_reg	0x13, r10
 	out.h	r7, 0x604[r0]
 	set_reg	0x14, r10
@@ -176,7 +178,7 @@ _eris_king_write_microprogram:
 	bne	1b
 	jmp	[lp]
 
-_eris_king_fill_microprogram:
+_king_fill_microprogram:
 	set_reg	0x13, r10
 	out.h	r7, 0x604[r0]
 	set_reg	0x14, r10
@@ -186,13 +188,13 @@ _eris_king_fill_microprogram:
 	bne	1b
 	jmp	[lp]
 
-_eris_king_enable_microprogram:
+_king_enable_microprogram:
 	mov	1, r11
 	set_reg	0x15, r10
 	out.h	r11, 0x604[r0]
 	jmp	[lp]
 
-_eris_king_disable_microprogram:
+_king_disable_microprogram:
 	set_reg	0x15, r10
 	out.h	r0, 0x604[r0]
 	jmp	[lp]

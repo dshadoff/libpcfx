@@ -1,7 +1,9 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff  <GitHub ID: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
@@ -11,8 +13,8 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
  * \brief Controls the KING processor.
  */
 
-#ifndef _LIBERIS_KING_H_
-#define _LIBERIS_KING_H_
+#ifndef _LIBPCFX_KING_H_
+#define _LIBPCFX_KING_H_
 
 #include <pcfx/types.h>
 
@@ -182,29 +184,29 @@ typedef enum {
 
 /*! \brief Initialize KING.
  */
-void eris_king_init(void);
+void king_init(void);
 /*! \brief Set KRAM read address.
  *
  * \param addr New read address.
  * \param incr How many 16bit words to increase on every read.
  */
-void eris_king_set_kram_read(u32 addr, int incr);
+void king_set_kram_read(u32 addr, int incr);
 /*! \brief Set KRAM write address.
  *
  * \param addr New write address.
  * \param incr How many 16bit words to increase on every write.
  */
-void eris_king_set_kram_write(u32 addr, int incr);
+void king_set_kram_write(u32 addr, int incr);
 /*! \brief Read from KRAM.
  *
  * \return Value read from KRAM.
  */
-u16 eris_king_kram_read(void);
+u16 king_kram_read(void);
 /*! \brief Write to KRAM.
  *
  * \param data Value to write to KRAM.
  */
-void eris_king_kram_write(u16 data);
+void king_kram_write(u16 data);
 /*! \brief Set the KRAM page for various peripherals.
  *
  * \param scsi The KRAM page used for SCSI. (0 ~ 1)
@@ -212,7 +214,7 @@ void eris_king_kram_write(u16 data);
  * \param rainbow The KRAM page used for RAINBOW. (0 ~ 1)
  * \param adpcm The KRAM page used for the ADPCM. (0 ~ 1)
  */
-void eris_king_set_kram_pages(u8 scsi, u8 bg, u8 rainbow, u8 adpcm);
+void king_set_kram_pages(u8 scsi, u8 bg, u8 rainbow, u8 adpcm);
 /*! \brief Set color modes for the backgrounds.
  *
  * \param bg0 Color mode for background 0.
@@ -220,7 +222,7 @@ void eris_king_set_kram_pages(u8 scsi, u8 bg, u8 rainbow, u8 adpcm);
  * \param bg2 Color mode for background 2.
  * \param bg3 Color mode for background 3.
  */
-void eris_king_set_bg_mode(king_bgmode bg0, king_bgmode bg1, king_bgmode bg2,
+void king_set_bg_mode(king_bgmode bg0, king_bgmode bg1, king_bgmode bg2,
 			king_bgmode bg3);
 /*! \brief Set priorities for the backgrounds.
  *
@@ -230,7 +232,7 @@ void eris_king_set_bg_mode(king_bgmode bg0, king_bgmode bg1, king_bgmode bg2,
  * \param bg3 Priority for background 3.
  * \param bgrot Background 0 rotation enable.
  */
-void eris_king_set_bg_prio(king_bgprio bg0, king_bgprio bg1, king_bgprio bg2,
+void king_set_bg_prio(king_bgprio bg0, king_bgprio bg1, king_bgprio bg2,
 			king_bgprio bg3, int bgrot);
 /*! \brief Set background sizes.
  *
@@ -240,7 +242,7 @@ void eris_king_set_bg_prio(king_bgprio bg0, king_bgprio bg1, king_bgprio bg2,
  * \param sub_h Height of the sub background (BG0 only).
  * \param sub_w Width of the sub background (BG0 only).
  */
-void eris_king_set_bg_size(king_bg bg, king_bgsize h, king_bgsize w,
+void king_set_bg_size(king_bg bg, king_bgsize h, king_bgsize w,
 			king_bgsize sub_h, king_bgsize sub_w);
 /*! \brief Set background BAT and CG addresses.
  *
@@ -248,34 +250,34 @@ void eris_king_set_bg_size(king_bg bg, king_bgsize h, king_bgsize w,
  * \param bat The KRAM address for the BAT.
  * \param cg The KRAM address of the CG.
  */
-void eris_king_set_bat_cg_addr(king_bg bg, u32 bat, u32 cg);
+void king_set_bat_cg_addr(king_bg bg, u32 bat, u32 cg);
 /*! \brief Set background scrolling.
  *
  * \param bg Which background to scroll (BG0SUB is not allowed).
  * \param x Signed X value correlating to the upper-left corner of the BG.
  * \param y Signed Y value correlating to the upper-left corner of the BG.
  */
-void eris_king_set_scroll(king_bg bg, s16 x, s16 y);
+void king_set_scroll(king_bg bg, s16 x, s16 y);
 /*! \brief Write the KING microprogram.
  *
  * \param data Array containing microprogram.
  * \param addr Address to start writing the microprogram.
  * \param len How many opcodes to write.
  */
-void eris_king_write_microprogram(u16* data, u8 addr, u8 len);
+void king_write_microprogram(u16* data, u8 addr, u8 len);
 /*! \brief Write the KING microprogram.
  *
  * \param data Opcode to fill microprogram with.
  * \param addr Address to start writing the microprogram.
  * \param len How many opcodes to write.
  */
-void eris_king_fill_microprogram(u16 data, u8 addr, u8 len);
+void king_fill_microprogram(u16 data, u8 addr, u8 len);
 /*! \brief Enable the KING microprogram.
  */
-void eris_king_enable_microprogram(void);
+void king_enable_microprogram(void);
 /*! \brief Disable the KING microprogram.
  */
-void eris_king_disable_microprogram(void);
+void king_disable_microprogram(void);
 
 #endif
 

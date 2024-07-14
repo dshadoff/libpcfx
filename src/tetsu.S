@@ -1,7 +1,9 @@
 /*
-        liberis -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
+                   Based on liberis by Alex Marshall
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff  <GitHub ID: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
@@ -10,21 +12,21 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 /*****************************************************************************
  *  NEW Tetsukannon (HuC6261) functions                                  []  *
  *****************************************************************************/
-	.global _eris_tetsu_init
-	.global	_eris_tetsu_set_video_mode
-	.global _eris_tetsu_set_palette
-	.global _eris_tetsu_set_7up_palette
-	.global _eris_tetsu_set_king_palette
-	.global	_eris_tetsu_set_rainbow_palette
-	.global _eris_tetsu_set_priorities
-	.global	_eris_tetsu_set_chroma_key
-	.global	_eris_tetsu_get_raster
-	.global	_eris_tetsu_get_field
-	.global	_eris_tetsu_is_displaying
-	.global	_eris_tetsu_set_cellophane_color
-	.global	_eris_tetsu_set_cellophane_sprites
-	.global	_eris_tetsu_set_cellophane_control
-	.global	_eris_tetsu_set_cellophane_coeffs
+	.global _tetsu_init
+	.global	_tetsu_set_video_mode
+	.global _tetsu_set_palette
+	.global _tetsu_set_7up_palette
+	.global _tetsu_set_king_palette
+	.global	_tetsu_set_rainbow_palette
+	.global _tetsu_set_priorities
+	.global	_tetsu_set_chroma_key
+	.global	_tetsu_get_raster
+	.global	_tetsu_get_field
+	.global	_tetsu_is_displaying
+	.global	_tetsu_set_cellophane_color
+	.global	_tetsu_set_cellophane_sprites
+	.global	_tetsu_set_cellophane_control
+	.global	_tetsu_set_cellophane_coeffs
 
 .macro	set_rrg	reg
 	out.h	\reg, 0x300[r0]
@@ -35,7 +37,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 	set_rrg	\tmp
 .endm
 
-_eris_tetsu_init:
+_tetsu_init:
 	set_reg	0, r10
 	out.h	r0, 0x304[r0]
 
@@ -66,7 +68,7 @@ _eris_tetsu_init:
 	out.h	r6, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_video_mode:
+_tetsu_set_video_mode:
 	ld.w	0[sp], r10
 	ld.w	4[sp], r11
 	ld.w	8[sp], r12
@@ -101,14 +103,14 @@ _eris_tetsu_set_video_mode:
 	out.h	r6, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_palette:
+_tetsu_set_palette:
 	set_reg	1, r10
 	out.h	r6, 0x304[r0]
 	set_reg	2, r10
 	out.h	r7, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_7up_palette:
+_tetsu_set_7up_palette:
 	set_reg 4, r10
 	shr	1, r6
 	shr	1, r7
@@ -117,7 +119,7 @@ _eris_tetsu_set_7up_palette:
 	out.b	r6, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_king_palette:
+_tetsu_set_king_palette:
 	set_reg 5, r10
 	shr	1, r6
 	shr	1, r7
@@ -132,13 +134,13 @@ _eris_tetsu_set_king_palette:
 	out.b	r8, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_rainbow_palette:
+_tetsu_set_rainbow_palette:
 	set_reg 7, r10
 	shr	1, r6
 	out.b	r6, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_priorities:
+_tetsu_set_priorities:
 	ld.w	0[sp], r10
 	ld.w	4[sp], r11
 	ld.w	8[sp], r12
@@ -158,7 +160,7 @@ _eris_tetsu_set_priorities:
 	out.h	r8, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_chroma_key:
+_tetsu_set_chroma_key:
 	ld.w	0[sp], r10
 	ld.w	4[sp], r11
 	set_reg	0xA, r12
@@ -175,30 +177,30 @@ _eris_tetsu_set_chroma_key:
 	out.h	r10, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_get_raster:
+_tetsu_get_raster:
 	in.h	0x300[r0], r10
 	shr	5, r10
 	andi	0x1FF, r10, r10
 	jmp	[lp]
 
-_eris_tetsu_get_field:
+_tetsu_get_field:
 	in.h	0x300[r0], r10
 	shr	14, r10
 	andi	1, r10, r10
 	jmp	[lp]
 
-_eris_tetsu_is_displaying:
+_tetsu_is_displaying:
 	in.h	0x300[r0], r10
 	shr	15, r10
 	andi	1, r10, r10
 	jmp	[lp]
 
-_eris_tetsu_set_cellophane_color:
+_tetsu_set_cellophane_color:
 	set_reg	0xD, r10
 	out.h	r6, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_cellophane_sprites:
+_tetsu_set_cellophane_sprites:
 	set_reg	0xF, r10
 	movea	0x10, r0, r12
 	mov	r0, r11
@@ -213,7 +215,7 @@ _eris_tetsu_set_cellophane_sprites:
 	out.h	r11, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_cellophane_control:
+_tetsu_set_cellophane_control:
 	ld.w	0[sp], r10
 	ld.w	4[sp], r11
 	ld.w	8[sp], r12
@@ -239,7 +241,7 @@ _eris_tetsu_set_cellophane_control:
 	out.h	r14, 0x304[r0]
 	jmp	[lp]
 
-_eris_tetsu_set_cellophane_coeffs:
+_tetsu_set_cellophane_coeffs:
 	ld.w	0[sp], r10
 	ld.w	4[sp], r11
 	ld.w	8[sp], r12
