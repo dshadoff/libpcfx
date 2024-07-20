@@ -20,11 +20,13 @@
 #
 .PHONY: all 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
      010_hello_interrupt 011_controller 019_bkupmem\
-     bg7up spr7up cellophane psg scsi scsi_dma cd clean
+     020_vdc_simple_background 021_vdc_simple_sprite\
+     cellophane psg scsi scsi_dma cd clean
 
 all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
      010_hello_interrupt 011_controller 019_bkupmem\
-     bg7up spr7up cellophane psg scsi scsi_dma 
+     020_vdc_simple_background 021_vdc_simple_sprite\
+     cellophane psg scsi scsi_dma 
 
 000_hello_newlib:
 	make -C $@
@@ -38,14 +40,14 @@ all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
 	make -C $@
 019_bkupmem:
 	make -C $@
+020_vdc_simple_background:
+	make -C $@
+021_vdc_simple_sprite:
+	make -C $@
 
 cellophane:
 	make -C $@
 psg:
-	make -C $@
-bg7up:
-	make -C $@
-spr7up:
 	make -C $@
 scsi:
 	make -C $@
@@ -57,8 +59,8 @@ cd:
 	make -C 010_hello_interrupt cd
 	make -C 011_controller cd
 	make -C 019_bkupmem cd
-	make -C bg7up cd
-	make -C spr7up cd
+	make -C 020_vdc_simple_background cd
+	make -C 021_vdc_simple_sprite cd
 	make -C psg cd
 	make -C cellophane cd
 	make -C scsi cd
@@ -71,8 +73,8 @@ clean:
 	make -C 010_hello_interrupt clean
 	make -C 011_controller clean
 	make -C 019_bkupmem clean
-	make -C bg7up clean
-	make -C spr7up clean
+	make -C 020_vdc_simple_background clean
+	make -C 021_vdc_simple_sprite clean
 	make -C psg clean
 	make -C cellophane clean
 	make -C scsi clean

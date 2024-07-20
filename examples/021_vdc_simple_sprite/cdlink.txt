@@ -1,0 +1,7 @@
+binary ./out.bin
+name VDC Simple Sprite Example
+maker dshadoff
+makerid DS
+date 20240718
+country 1
+version 256

@@ -18,9 +18,7 @@ Copyright (C) 2011		Alex Marshall "trap15" <trap15@raidenii.net>
 #include <pcfx/romfont.h>
 #include <pcfx/king.h>
 #include <pcfx/tetsu.h>
-
-#include <eris/7up.h>
-#include <eris/low/7up.h>
+#include <pcfx/vdc.h>
 
 void printch(u32 sjis, u32 kram, int tall);
 void printstr(const char* str, int x, int y, int tall);
@@ -44,7 +42,9 @@ int main(int argc, char *argv[])
 	u16 microprog[16];
 	u32 pad;
 
-	sup_init(0, 1);
+	vdc_init_5MHz(VDC0);
+	vdc_init_5MHz(VDC1);
+
 	king_init();
 	tetsu_init();
 	contrlr_pad_init(0);
@@ -81,10 +81,10 @@ int main(int argc, char *argv[])
 	king_set_bat_cg_addr(KING_BG0SUB, 0, 0);
 	king_set_scroll(KING_BG0, 0, 0);
 	king_set_bg_size(KING_BG0, KING_BGSIZE_256, KING_BGSIZE_256, KING_BGSIZE_256, KING_BGSIZE_256);
-	low_sup_set_control(0, 0, 0, 1);
-	low_sup_set_access_width(0, 0, SUP_LOW_MAP_32X32, 0, 0);
-	low_sup_set_scroll(0, 0, 0);
-	low_sup_set_video_mode(0, 2, 2, 4, 0x1F, 0x11, 2, 239, 2);
+
+        vdc_setreg(VDC0, VDC_REG_CR, VDC_CR_SB);
+        vdc_setreg(VDC0, VDC_REG_MWR, VDC_MWR_SCREEN_32x32);
+	vdc_set_scroll(VDC0, 0, 0);
 
 	king_set_kram_read(0, 1);
 	king_set_kram_write(0, 1);
@@ -97,14 +97,14 @@ int main(int argc, char *argv[])
 	// load sprite data
 	// -> Apparently at VRAM address 0x0000, which works becuase BG is disabled)
 	//
-	low_sup_set_vram_write(0, 0);
+	vdc_set_vram_write(VDC0, 0);
 	for(i = 0; i < 8*4; i++) {
-		low_sup_vram_write(0, spr_data[i]); /* sprite is plus sign */
+		vdc_vram_write(VDC0, spr_data[i]); /* sprite is plus sign */
 	}
 
-	sup_set(0);
-	sup_spr_set(0);
-	sup_spr_create(0, 0, 0, 0);
+	vdc_set(VDC0);
+	vdc_spr_set(VDC0);
+	vdc_spr_create(VDC0, 0, 0, 0);
 
 	king_set_kram_write(0, 1);
 	printstr("7up sprite example", 7, 0x10, 1);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 	xl = yl = 1;
 	for(;;) {
 		pad = contrlr_pad_read(0);
-		sup_spr_xy(x, y);
+		vdc_spr_xy(x, y);
 		if((yl != 1) && (pad & (1<<10)))
 			y++;
 		else if((yl != -1) && (pad & (1<<8)))
