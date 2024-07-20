@@ -15,7 +15,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 	.global _tetsu_init
 	.global	_tetsu_set_video_mode
 	.global _tetsu_set_palette
-	.global _tetsu_set_7up_palette
+	.global _tetsu_set_vdc_palette
 	.global _tetsu_set_king_palette
 	.global	_tetsu_set_rainbow_palette
 	.global _tetsu_set_priorities
@@ -110,7 +110,7 @@ _tetsu_set_palette:
 	out.h	r7, 0x304[r0]
 	jmp	[lp]
 
-_tetsu_set_7up_palette:
+_tetsu_set_vdc_palette:
 	set_reg 4, r10
 	shr	1, r6
 	shr	1, r7

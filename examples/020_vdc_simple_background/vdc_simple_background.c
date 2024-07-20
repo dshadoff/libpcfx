@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	tetsu_init();
 	
 	tetsu_set_priorities(0, 0, 1, 0, 0, 0, 0);
-	tetsu_set_7up_palette(0, 0);
+	tetsu_set_vdc_palette(0, 0);
 	tetsu_set_king_palette(0, 0, 0, 0);
 	tetsu_set_rainbow_palette(0);
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	}
 
 	king_set_kram_write(0, 1);
-	printstr("7up BG example", 9, 0x10, 1);
+	printstr("VDC BG example", 9, 0x10, 1);
 
 	return 0;
 }

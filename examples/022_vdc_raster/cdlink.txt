@@ -1,0 +1,7 @@
+binary ./out.bin
+name VDC Raster Effect Example
+maker dshadoff
+makerid TDS
+date 20240720
+country 1
+version 256

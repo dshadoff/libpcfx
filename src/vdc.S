@@ -192,7 +192,7 @@ vdc_init:
         /* Setup the remaining registers according to the table referenced at the start */
 
         /* Note that old code said (and I don't know why):                              */
-        /*      "Never setup the timing on 7up-B" (MWR/HSR/HDR/VPR/VDR/VCR)             */
+        /*      "Never setup the timing on VDC-B" (MWR/HSR/HDR/VPR/VDR/VCR)             */
 
 	mov	r19, r6
         shl     8, r6                        /* r6 = vdc number */
@@ -618,7 +618,7 @@ _vdc_spr_get_pal:
 
 
 /*****************************************************************************
- *  Low-level 7up functions                                                  *
+ *  Low-level VDC functions                                                  *
  *****************************************************************************/
         .global _vdc_status
         .global _vdc_setreg
@@ -627,10 +627,9 @@ _vdc_spr_get_pal:
         .global _vdc_vram_write
         .global _vdc_set_vram_read
         .global _vdc_vram_read
-        .global _vdc_set_interrupt_raster
+        .global _vdc_set_raster
         .global _vdc_set_scroll
         .global _vdc_do_dma
-        .global _vdc_setup_dma
         .global _vdc_set_satb_address
 
 
@@ -741,13 +740,28 @@ _vdc_vram_read:
         in.h    4[r10], r10
         jmp     [lp]
 
-/* Note - 64 = first line */
-_vdc_set_interrupt_raster:
+/*-----------------------------------------------------------*
+ * void vdc_set_raster(int chip, int raster)                 *
+ *                                                           *
+ * inputs:                                                   *
+ *  r6 = chip:    which VDC chip to act on (0 - 1)           *
+ *  r7 = raster:  Raster to generate interrupt on            *
+ *                (This should be raster line + 64)          *
+ *-----------------------------------------------------------*/
+_vdc_set_raster:
         shl     8, r6
         set_vreg_num    VDC_REG_RCR, r6, r10, r11
         out.h   r7, 4[r10]
         jmp     [lp]
 
+/*-----------------------------------------------------------*
+ * void vdc_set_scroll(int chip, u16 x, u16 y)               *
+ *                                                           *
+ * inputs:                                                   *
+ *  r6 = chip: which VDC chip to act on (0 - 1)              *
+ *  r7 = x:    Top-left X coordinate of background           *
+ *  r7 = y:    Top-left Y coordinate of background           *
+ *-----------------------------------------------------------*/
 _vdc_set_scroll:
         shl     8, r6
         set_vreg_num    VDC_REG_BXR, r6, r10, r11
@@ -756,6 +770,15 @@ _vdc_set_scroll:
         out.h   r8, 4[r10]
         jmp     [lp]
 
+/*-----------------------------------------------------------*
+ * void vdc_do_dma(int chip, u16 src, u16 dst, u16 len)      *
+ *                                                           *
+ * inputs:                                                   *
+ *  r6 = chip: which VDC chip to act on (0 - 1)              *
+ *  r7 = src:  Source address of the DMA                     *
+ *  r8 = dst:  Destination address of the DMA                *
+ *  r9 = len:  Number of 16-bit words to transfer            *
+ *-----------------------------------------------------------*/
 _vdc_do_dma:
         shl     8, r6
         set_vreg_num    VDC_REG_SOUR, r6, r10, r11
@@ -766,24 +789,15 @@ _vdc_do_dma:
         out.h   r9, 4[r10]
         jmp     [lp]
 
-_vdc_setup_dma:
-        ld.w    0[sp], r10
-        ld.w    4[sp], r11
-        shl     8, r6
-        shl     4, r7
-        shl     3, r8
-        shl     2, r9
-        shl     1, r10
-        or      r8, r7
-        or      r9, r7
-        or      r10, r7
-        or      r11, r7
-        set_vreg_num    VDC_REG_DCR, r6, r10, r11
-        out.h   r7, 4[r10]
-        jmp     [lp]
-
-/* 
-*/
+/*-----------------------------------------------------------*
+ * void vdc_set_satb_address(int chip, u16 addr)             *
+ *                                                           *
+ * inputs:                                                   *
+ *  r6 = chip:  which VDC chip to act on (0 - 1)             *
+ *  r7 = addr:  VRAM address for the start of the SATB.      *
+ *    Note: This also sets a new base address for the        *
+ *          sprite functions to use                          *
+ *-----------------------------------------------------------*/
 _vdc_set_satb_address:
         mov     r6, r12
         shl     8, r6

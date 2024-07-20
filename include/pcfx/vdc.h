@@ -16,7 +16,38 @@ Copyright (C) 2011                           Nodtveidt <david@eponasoft.com>
 #ifndef _LIBPCFX_VDC_H_
 #define _LIBPCFX_VDC_H_
 
-// HuC6270 VDC defines (move these to library includes)
+
+// Normal sequence of operation:
+// -----------------------------
+// Based on frequency choice when initializing TETSU (5MHz or 7MHz), use
+// the appropriate vdc_init_xMHz() initialization function which clears
+// VRAM, and initializes VDC registers to default settings for that pixel
+// clock.
+//
+// Functions are supplied for the SIMPLE VDC registers which are most likely
+// to be changed by the programmer (RCR, BXR, BYR, SOUR/DESR/LENR, DVSSR)
+//
+// For other VDC registers such as bitfield registers (CR, MWR, DCR), and
+// screen size/position registers (HSR, HDR, VPR, VDR, VCR), you can use
+// vdc_setreg using the MACRO names below.
+//
+// You will almost certainly want to go back and set the CR register to
+// show background and sprites (they are disabled by default).
+//
+// You will also probably want to trigger a VBLANK interrupt.
+//
+// Note that only the memory is readable - the registers are not. This
+// is one reason why the multi-bitfield registers don't have direct-setting
+// functions (the origianl version of liberis assumed that they were indeed
+// readable and tried to set sub-bitfields, resulting in bad settings).
+//
+// Remember to set up interrupt handling in your program before setting
+// any of these registers to fire interrupts.
+//
+
+
+
+// HuC6270 VDC defines
 //
 #define VDC_REG_MAWR    0x00      // Memory Address Write register
 #define VDC_REG_MARR    0x01      // Memory Address Read register
@@ -196,7 +227,7 @@ void vdc_set_interrupts(int chip, int vblank_irq, int raster_irq,
  * chip:   Which VDC to set the raster on. (0 ~ 1)
  * raster: Which raster to generate an IRQ on.
  */
-void vdc_set_interrupt_raster(int chip, int raster);
+void vdc_set_raster(int chip, int raster);
 
 /* Scroll a VDC background.
  *
@@ -214,20 +245,6 @@ void vdc_set_scroll(int chip, u16 x, u16 y);
  * len:   How many 16bit words to transfer.
  */
 void vdc_do_dma(int chip, u16 src, u16 dst, u16 len);
-
-/* Setup the DMA on a VDC.
- *
- * chip:        Which VDC to setup the DMA on. (0 ~ 1)
- * satb_repeat: Whether to continually DMA the SATB after a transfer.
- * src_dec:     If 1, decrement the source address for each transfer.
- *                Otherwise, increment it.
- * dst_dec:     If 1, decrement the destination address for each transfer.
- *                Otherwise, increment it.
- * vram_irq:    Fire an IRQ at the end of a VRAM->VRAM transfer.
- * satb_irq:    Fire an IRQ at the end of a VRAM->SATB transfer.
- */
-void vdc_setup_dma(int chip, int satb_repeat, int src_dec,
-                   int dst_dec, int vram_irq, int satb_irq);
 
 /* Sets the Sprite Attribute Table Block address.
  *

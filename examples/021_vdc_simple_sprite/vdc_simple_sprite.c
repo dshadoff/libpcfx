@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	contrlr_pad_init(0);
 	
 	tetsu_set_priorities(0, 0, 1, 0, 0, 0, 0);
-	tetsu_set_7up_palette(0, 0);
+	tetsu_set_vdc_palette(0, 0);
 	tetsu_set_king_palette(0, 0, 0, 0);
 	tetsu_set_rainbow_palette(0);
 
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 	vdc_spr_create(VDC0, 0, 0, 0);
 
 	king_set_kram_write(0, 1);
-	printstr("7up sprite example", 7, 0x10, 1);
+	printstr("VDC sprite example", 7, 0x10, 1);
 
 	x = 0x40;  // note that X-offsets are not 0-relative (0x20 is the left edge of the screen)
 	y = 0x60;  // note that Y-offsets are not 0-relative (0x40 is the top edge of the screen)

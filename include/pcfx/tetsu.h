@@ -58,10 +58,10 @@ void tetsu_init();
  * \param lines Vertical line mode.
  * \param ext_sync Whether to use external sync.
  * \param dotclock The dotclock to run at.
- * \param bg_depth Color depth of 7up backgrounds.
- * \param spr_depth Color depth of 7up sprites.
- * \param bg7up_show Whether 7up backgrounds are displayed.
- * \param spr7up_show Whether 7up sprites are displayed.
+ * \param bg_depth Color depth of VDC backgrounds.
+ * \param spr_depth Color depth of VDC sprites.
+ * \param vdcbg Whether VDC backgrounds are displayed.
+ * \param vdcspr Whether VDC sprites are displayed.
  * \param bg0_disp Whether KING BG0 is displayed.
  * \param bg1_disp Whether KING BG1 is displayed.
  * \param bg2_disp Whether KING BG2 is displayed.
@@ -70,8 +70,8 @@ void tetsu_init();
  */
 void tetsu_set_video_mode(tetsu_lines lines, int ext_sync,
 			tetsu_dotclock dotclock, tetsu_colordepth bg_depth,
-			tetsu_colordepth spr_depth, int bg7up_show,
-			int spr7up_show, int bg0_disp, int bg1_disp,
+			tetsu_colordepth spr_depth, int vdcbg_show,
+			int vdcspr_show, int bg0_disp, int bg1_disp,
 			int bg2_disp, int bg3_disp, int rainbow_disp);
 /*! \brief Set a palette entry.
  *
@@ -79,15 +79,15 @@ void tetsu_set_video_mode(tetsu_lines lines, int ext_sync,
  * \param color The color to set. In Y8U4V4 format.
  */
 void tetsu_set_palette(u16 pal_entry, u16 color);
-/*! \brief Which palette to use for the 7up chips.
+/*! \brief Which palette to use for the VDC chips.
  *
  * Palettes are actually indexes into the palette which is the first color
- * to the chip. For example, if bg7up was 4, then the 4th palette entry would
+ * to the chip. For example, if vdcbg was 4, then the 4th palette entry would
  * be color 0, 5th would be 1, etc.
- * \param bg7up Which palette to use for 7up backgrounds.
- * \param spr7up Which palette to use for 7up sprites.
+ * \param vdcbg Which palette to use for VDC backgrounds.
+ * \param vdcspr Which palette to use for VDC sprites.
  */
-void tetsu_set_7up_palette(u16 bg7up, u16 spr7up);
+void tetsu_set_vdc_palette(u16 vdcbg, u16 vdcspr);
 /*! \brief Which palette to use for the KING backgrounds.
  *
  * Palettes are actually indexes into the palette which is the first color
@@ -109,15 +109,15 @@ void tetsu_set_king_palette(u16 bg0, u16 bg1, u16 bg2, u16 bg3);
 void tetsu_set_rainbow_palette(u16 rainbow);
 /*! \brief Set layer priorities.
  *
- * \param bg7up Priority for the 7up backgrounds. (0 ~ 7)
- * \param spr7up Priority for the 7up sprites. (0 ~ 7)
+ * \param vdcbg Priority for the VDC backgrounds. (0 ~ 7)
+ * \param vdcspr Priority for the VDC sprites. (0 ~ 7)
  * \param bg0 Priority for KING BG0. (0 ~ 7)
  * \param bg1 Priority for KING BG1. (0 ~ 7)
  * \param bg2 Priority for KING BG2. (0 ~ 7)
  * \param bg3 Priority for KING BG3. (0 ~ 7)
  * \param rainbow Priority for RAINBOW. (0 ~ 7)
  */
-void tetsu_set_priorities(u8 bg7up, u8 spr7up, u8 bg0, u8 bg1, u8 bg2,
+void tetsu_set_priorities(u8 vdcbg, u8 vdcspr, u8 bg0, u8 bg1, u8 bg2,
 				u8 bg3, u8 rainbow);
 /*! \brief Set chroma color key values.
  *
@@ -164,8 +164,8 @@ void tetsu_set_cellophane_sprites(int* banks); /* 16 element array */
  * \param enable Whether the cellophane is being used or not.
  * \param in_front Whether the cellophane is the constant color, or the active
  *                 surfaces. If 1, it is the constant color.
- * \param bg7up Which coefficient to use for 7up backgrounds.
- * \param spr7up Which coefficient to use for 7up sprites.
+ * \param vdcbg Which coefficient to use for VDC backgrounds.
+ * \param vdcspr Which coefficient to use for VDC sprites.
  * \param bg0 Which coefficient to use for KING BG0.
  * \param bg1 Which coefficient to use for KING BG1.
  * \param bg2 Which coefficient to use for KING BG2.
@@ -173,7 +173,7 @@ void tetsu_set_cellophane_sprites(int* banks); /* 16 element array */
  * \param rainbow Which coefficient to use for RAINBOW output.
  */
 void tetsu_set_cellophane_control(int enable, int in_front,
-				tetsu_coeff bg7up, tetsu_coeff spr7up,
+				tetsu_coeff vdcbg, tetsu_coeff vdcspr,
 				tetsu_coeff bg0, tetsu_coeff bg1,
 				tetsu_coeff bg2, tetsu_coeff bg3,
 				tetsu_coeff rainbow);
