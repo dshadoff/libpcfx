@@ -55,6 +55,8 @@ psg:
 	make -C $@
 scsi:
 	make -C $@
+scsi_dma:
+	make -C $@
 
 cd:
 	make -C 000_hello_newlib cd
