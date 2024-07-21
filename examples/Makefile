@@ -20,12 +20,12 @@
 #
 .PHONY: all 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
      010_hello_interrupt 011_controller 019_bkupmem\
-     020_vdc_simple_background 021_vdc_simple_sprite\
+     020_vdc_simple_background 021_vdc_simple_sprite 022_vdc_raster 023_vdc_multi_sprite\
      cellophane psg scsi scsi_dma cd clean
 
 all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
      010_hello_interrupt 011_controller 019_bkupmem\
-     020_vdc_simple_background 021_vdc_simple_sprite\
+     020_vdc_simple_background 021_vdc_simple_sprite 022_vdc_raster 023_vdc_multi_sprite\
      cellophane psg scsi scsi_dma 
 
 000_hello_newlib:
@@ -44,6 +44,10 @@ all: 000_hello_newlib 001_hello_plusplus 002_hello_no_libc\
 	make -C $@
 021_vdc_simple_sprite:
 	make -C $@
+022_vdc_raster:
+	make -C $@
+023_vdc_multi_sprite:
+	make -C $@
 
 cellophane:
 	make -C $@
@@ -61,6 +65,8 @@ cd:
 	make -C 019_bkupmem cd
 	make -C 020_vdc_simple_background cd
 	make -C 021_vdc_simple_sprite cd
+	make -C 022_vdc_raster cd
+	make -C 023_vdc_multi_sprite cd
 	make -C psg cd
 	make -C cellophane cd
 	make -C scsi cd
@@ -75,6 +81,8 @@ clean:
 	make -C 019_bkupmem clean
 	make -C 020_vdc_simple_background clean
 	make -C 021_vdc_simple_sprite clean
+	make -C 022_vdc_raster clean
+	make -C 023_vdc_multi_sprite clean
 	make -C psg clean
 	make -C cellophane clean
 	make -C scsi clean
