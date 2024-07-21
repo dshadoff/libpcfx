@@ -36,6 +36,8 @@ const uint16_t spr_data[] = {
   0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000
 };
 
+const uint16_t sprite_image_load_addr = 0x4000;
+
 int main(int argc, char *argv[])
 {
 	int i, x, y, xl, yl;
@@ -44,6 +46,7 @@ int main(int argc, char *argv[])
 
 	vdc_init_5MHz(VDC0);
 	vdc_init_5MHz(VDC1);
+	vdc_set_satb_address(VDC0, 0x7000);  // just to show that it doesn't have to be 0xff00
 
 	king_init();
 	tetsu_init();
@@ -95,16 +98,16 @@ int main(int argc, char *argv[])
 	}
 
 	// load sprite data
-	// -> Apparently at VRAM address 0x0000, which works becuase BG is disabled)
+	// -> Place at VRAM address set by sprite_image_load_addr
 	//
-	vdc_set_vram_write(VDC0, 0);
+	vdc_set_vram_write(VDC0, sprite_image_load_addr);
 	for(i = 0; i < 8*4; i++) {
 		vdc_vram_write(VDC0, spr_data[i]); /* sprite is plus sign */
 	}
 
 	vdc_set(VDC0);
-	vdc_spr_set(VDC0);
-	vdc_spr_create(VDC0, 0, 0, 0);
+	vdc_spr_set(0);  // Use sprite #0, but could be any (0 - 63)
+	vdc_spr_create(0, 0, VDC_SPR_PATTERN(sprite_image_load_addr), 0);
 
 	king_set_kram_write(0, 1);
 	printstr("VDC sprite example", 7, 0x10, 1);
@@ -116,13 +119,14 @@ int main(int argc, char *argv[])
 	for(;;) {
 		pad = contrlr_pad_read(0);
 		vdc_spr_xy(x, y);
-		if((yl != 1) && (pad & (1<<10)))
+
+		if((yl != 1) && (pad & JOY_DOWN))
 			y++;
-		else if((yl != -1) && (pad & (1<<8)))
+		else if((yl != -1) && (pad & JOY_UP))
 			y--;
-		if((xl != 1) && (pad & (1<<9)))
+		if((xl != 1) && (pad & JOY_RIGHT))
 			x++;
-		else if((xl != -1) && (pad & (1<<11)))
+		else if((xl != -1) && (pad & JOY_LEFT))
 			x--;
 		if(x > 256+32-16) xl = 1;
 		else if(x < 32)   xl = -1;
@@ -130,7 +134,10 @@ int main(int argc, char *argv[])
 		if(y > 238+64-16) yl = 1;
 		else if(y < 64+2) yl = -1;
 		else              yl = 0;
-		for(i = 0; i < 0x4000; i++) {
+
+		/* crude way to make a delay */
+	        /* Following examples should wait for VBlank */
+		for(i = 0; i < 0x6000; i++) {
 			asm("mov r0, r0");
 		}
 	}

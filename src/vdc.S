@@ -73,28 +73,9 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 .endm
 
 
-
-.macro get_vdc vdcreg
-	movhi	hi(vdc_last_sup), r0, \vdcreg
-	ld.w	lo(vdc_last_sup)[\vdcreg], \vdcreg
-.endm
-
-.macro setup_addr sprreg, vdcreg, calcreg, off
-	movhi	hi(vdc_last_sup), r0, \vdcreg
-	movea	lo(vdc_last_spr), r0, \sprreg
-	ld.w	lo(vdc_last_sup)[\vdcreg], \vdcreg
-	movhi	hi(vdc_last_spr), \sprreg, \sprreg
-	add	\vdcreg, \sprreg
-	ld.w	0[\sprreg], \sprreg
-
-	shl	2, \sprreg
-	ori	0xFF00|\off, \sprreg, \calcreg
-.endm
-
 /*****************************************************************************
  *  High-level VDC control                                                   *
  *****************************************************************************/
-	.global	_satb_base
 	.global	_vdc_init_5MHz
 	.global	_vdc_init_7MHz
 	.global	_vdc_set
@@ -113,12 +94,17 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 	.global	_vdc_spr_get_pattern
 
 
-vdc_last_sup:
-	.word	0
+vdc_last_vdcnum:
+	.hword	0
 vdc_last_spr:
-	.word	0, 0
+	.hword	0
 
-_satb_base:
+vdc_curr_vdcport:   /* hardware port of current sprite-related operation */
+	.word	0
+vdc_curr_spr_addr:  /* Address in VRAM of the current sprite entry in SATB */
+	.hword	0
+
+satb_base:
 	.hword  0   /* SATB location on VDC 0 */
 	.hword  0   /* SATB location on VDC 1 */
 
@@ -210,20 +196,16 @@ vdc_init:
         bne     2b
 
 
-        /********/
-        /* Not sure what this "sprite stuff" does yet */
+	/* setup sprite basics - vdcnum, vdcport, last_spr */
 
 	mov	r19, r6
-	# sprite stuff
-	movhi	hi(vdc_last_sup), r0, r10
-	movea	lo(vdc_last_spr), r0, r11
-	movhi	hi(vdc_last_spr), r11, r11
+	movw	vdc_last_vdcnum, r10   /* address of storage  */
+	st.h	r6, 0[r10]             /* place VDC num there */
 
-	st.w	r19, lo(vdc_last_sup)[r10]
-	shl	2, r6
-	add	r6, r11
-	st.w	r0, 0[r11]
-        /********/
+	shl     8, r6                  /* pre-calc I/O port addr */
+        movea   VDC_0_PORT, r6, r7
+	movw    vdc_curr_vdcport, r8   /* address of storage */
+	st.w	r7, 0[r8]              /* place port # there */
 
 
         /* Setup SATB */
@@ -234,10 +216,18 @@ vdc_init:
         movw    0xFF00, r11 
         out.h   r11, 4[r10]
 
-        movw    _satb_base, r10     /* place value in _satb_base array */
+        movw    satb_base, r10     /* place value in satb_base array */
         mov     r19, r6
 	shl	1, r6
         add     r6, r10
+        st.h    r11, 0[r10]
+
+	/* finish  sprite basics - vdcnum, vdcport, last_spr */
+
+	movw	vdc_last_spr, r10      /* store 0 at vdc_last_spr */
+	st.h	r0, 0[r10]
+
+	movw	vdc_curr_spr_addr, r10
         st.h    r11, 0[r10]
 
 	jmp	[lp]
@@ -250,8 +240,14 @@ vdc_init:
  *------------------------------------------*/
 _vdc_set:
 	andi	1, r6, r6
-	movhi	hi(vdc_last_sup), r0, r10
-	st.w	r6, lo(vdc_last_sup)[r10]
+	movw	vdc_last_vdcnum, r10   /* address of storage  */
+	st.h	r6, 0[r10]             /* place VDC num there */
+
+	shl     8, r6                  /* pre-calc I/O port addr */
+        movea   VDC_0_PORT, r6, r7
+	movw    vdc_curr_vdcport, r8   /* address of storage */
+	st.w	r7, 0[r8]              /* place port # there */
+
 	jmp	[lp]
 
 
@@ -263,84 +259,99 @@ _vdc_set:
  *------------------------------------------*/
 _vdc_spr_set:
 	andi	63, r6, r6
-	movhi	hi(vdc_last_sup), r0, r10
-	movea	lo(vdc_last_spr), r0, r11
-	ld.w	lo(vdc_last_sup)[r10], r10
-	movhi	hi(vdc_last_spr), r11, r11
-	add	r10, r11
-	st.w	r6, 0[r11]
+	movw	vdc_last_spr, r7       /* store at vdc_last_spr */
+	st.h	r6, 0[r7]
+
+	movw	vdc_last_vdcnum, r7
+	ld.h    0[r7], r8              /* r8 = curr vdc */
+
+	movw    satb_base, r7
+	add     r8, r7                 /* get SATB addr for curr VDC */
+	ld.h    0[r7], r8
+
+	movw	vdc_curr_spr_addr, r7
+	shl     2, r6                  /* each sprite entry is 4 16-bit words */
+	add     r6, r8
+	st.h    r8, 0[r7]
+
 	jmp	[lp]
 
+
 /*------------------------------------------*
- * void vdc_spr_x(s16 x)                    *
+ * void vdc_spr_x(u16 x)                    *
  *                                          *
  * inputs:                                  *
  *  r6 = x                                  *
  *------------------------------------------*/
 _vdc_spr_x:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 1
-	mov	r6, r16
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_write
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	mov	r16, r7
-	jal	_vdc_vram_write
+	addi    1, r12, r12               /* X is second 16-bit word in sprite entry */
 
-	mov	r17, lp
+	out.h   r0, 0[r11]                /* set VDC_REG_MAWR */
+	out.h   r12, 4[r11]               /* set addr to write */
+
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	out.h   r6, 4[r11]                /* x addr is first */
+
 	jmp	[lp]
 
 /*------------------------------------------*
- * void vdc_spr_y(s16 y)                    *
+ * void vdc_spr_y(u16 y)                    *
  *                                          *
  * inputs:                                  *
  *  r6 = y                                  *
  *------------------------------------------*/
 _vdc_spr_y:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 0
-	mov	r6, r16
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_write
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	mov	r16, r7
-	jal	_vdc_vram_write
+	out.h   r0, 0[r11]                /* set VDC_REG_MAWR */
+	out.h   r12, 4[r11]               /* set addr to write */
 
-	mov	r17, lp
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	out.h   r6, 4[r11]                /* y addr is first */
+
 	jmp	[lp]
 
 /*------------------------------------------*
- * void vdc_spr_xy(s16 x, s16 y)            *
+ * void vdc_spr_xy(u16 x, u16 y)            *
  *                                          *
  * inputs:                                  *
  *  r6 = x                                  *
  *  r7 = y                                  *
  *------------------------------------------*/
 _vdc_spr_xy:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 0
-	mov	r6, r16
-	mov	r7, r15
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_write
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	mov	r15, r7
-	jal	_vdc_vram_write
+	out.h   r0, 0[r11]                /* set VDC_REG_MAWR */
+	out.h   r12, 4[r11]               /* set addr to write */
 
-	mov	r19, r6
-	mov	r16, r7
-	jal	_vdc_vram_write
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	out.h   r7, 4[r11]                /* y addr is first */
 
-	mov	r17, lp
+	addi    1, r12, r12               /* Add 1 to VRAM addr. This is necessary */
+	out.h   r0, 0[r11]                /* only because we don't know whether it */
+	out.h   r12, 4[r11]               /* is set to auto-increment by 1 */
+
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	out.h   r6, 4[r11]                /* now, x addr */
+
 	jmp	[lp]
 
 /*------------------------------------------*
@@ -350,51 +361,45 @@ _vdc_spr_xy:
  *  r6 = pat                                *
  *------------------------------------------*/
 _vdc_spr_pattern:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 2
-	mov	r6, r16
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_write
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	mov	r16, r7
-	jal	_vdc_vram_write
+	addi    2, r12, r12               /* pattern is third 16-bit word in sprite entry */
 
-	mov	r17, lp
+	out.h   r0, 0[r11]                /* set VDC_REG_MAWR */
+	out.h   r12, 4[r11]               /* set addr to write */
+
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	out.h   r6, 4[r11]                /* pattern */
+
 	jmp	[lp]
 
 /*------------------------------------------*
- * void vdc_spr_pri(int pri)                *
+ * void vdc_spr_ctrl(u16 val)               *
  *                                          *
  * inputs:                                  *
- *  r6 = pri                                *
+ *  r6 = val                                *
  *------------------------------------------*/
-_vdc_spr_pri:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 3
-	mov	r6, r16
+_vdc_spr_ctrl:
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_write
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	shl	7, r16
+	addi    3, r12, r12               /* control is fourth 16-bit word in sprite entry */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_read
+	out.h   r0, 0[r11]                /* set VDC_REG_MAWR */
+	out.h   r12, 4[r11]               /* set addr to write */
 
-	mov	r19, r6
-	jal	_vdc_vram_read
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	out.h   r6, 4[r11]                /* control */
 
-	andi	0x80, r10, r7
-	or	r16, r7
-	mov	r19, r6
-	jal	_vdc_vram_write
-
-	mov	r17, lp
 	jmp	[lp]
 
 /*------------------------------------------*
@@ -404,64 +409,37 @@ _vdc_spr_pri:
  *  r6 = pal                                *
  *------------------------------------------*/
 _vdc_spr_pal:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 3
-	andi	0xF, r6, r16
+	andi	0x000F, r6, r6            /* palette portion only */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_write
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_read
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	jal	_vdc_vram_read
+	addi    3, r12, r12               /* control is fourth 16-bit word in sprite entry */
 
-	andi	0xFFF0, r10, r7
-	or	r16, r7
-	mov	r19, r6
-	jal	_vdc_vram_write
+	movea   VDC_REG_MARR, r0, r13
+	out.h   r13, 0[r11]               /* set VDC_REG_MARR */
+	out.h   r12, 4[r11]               /* set addr to read */
 
-	mov	r17, lp
-	jmp	[lp]
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	in.h    4[r11], r10               /* control data */
 
-/*------------------------------------------*
- * void vdc_spr_ctrl(u16 mask, u16 val)     *
- *                                          *
- * inputs:                                  *
- *  r6 = mask                               *
- *  r7 = val                                *
- *------------------------------------------*/
-_vdc_spr_ctrl:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 3
-	mov	r6, r16
-	mov	r7, r15
+	andi	0xFFF0, r10, r10          /* remove palette portion */
+	or	r6, r10                   /* new palette portion */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_write
+	out.h   r0, 0[r11]                /* set VDC_REG_MAWR */
+	out.h   r12, 4[r11]               /* set addr to write */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_read
+	out.h   r13, 0[r11]               /* r13 still holds VDC_REG_DATA */
+	out.h   r10, 4[r11]               /* output value */
 
-	mov	r19, r6
-	jal	_vdc_vram_read
-	mov	r10, r7
-
-	and	r16, r7
-	or	r15, r7
-	mov	r19, r6
-	jal	_vdc_vram_write
-
-	mov	r17, lp
 	jmp	[lp]
 
 /*------------------------------------------------------*
- * void vdc_spr_create(s16 x, s16 y, u16 pat, u16 ctrl) *
+ * void vdc_spr_create(u16 x, u16 y, u16 pat, u16 ctrl) *
  *                                                      *
  * inputs:                                              *
  *  r6 = x                                              *
@@ -470,36 +448,44 @@ _vdc_spr_ctrl:
  *  r9 = ctrl                                           *
  *------------------------------------------------------*/
 _vdc_spr_create:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 0
-	mov	r6, r16
-	mov	r7, r15
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_write
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	mov	r15, r7
-	jal	_vdc_vram_write
+	out.h   r0, 0[r11]                /* set VDC_REG_MAWR */
+	out.h   r12, 4[r11]               /* set addr to write */
 
-	mov	r19, r6
-	mov	r16, r7
-	jal	_vdc_vram_write
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	out.h   r7, 4[r11]                /* y addr is first */
 
-	mov	r19, r6
-	mov	r8, r7
-	jal	_vdc_vram_write
+	addi    1, r12, r12               /* Add 1 to VRAM addr. This is necessary */
+	out.h   r0, 0[r11]                /* only because we don't know whether it */
+	out.h   r12, 4[r11]               /* is set to auto-increment by 1 */
 
-	mov	r19, r6
-	mov	r9, r7
-	jal	_vdc_vram_write
+	out.h   r13, 0[r11]               /* r13 is still VDC_REG_DATA */
+	out.h   r6, 4[r11]                /* now, x addr */
 
-	mov	r17, lp
+	addi    1, r12, r12               /* Add 1 to VRAM addr. again */
+	out.h   r0, 0[r11]                /* Set MAWR again */
+	out.h   r12, 4[r11]
+
+	out.h   r13, 0[r11]               /* r13 is still VDC_REG_DATA */
+	out.h   r8, 4[r11]                /* now, pattern */
+
+	addi    1, r12, r12               /* Add 1 to VRAM addr. again */
+	out.h   r0, 0[r11]                /* Set MAWR again */
+	out.h   r12, 4[r11]
+
+	out.h   r13, 0[r11]               /* r13 is still VDC_REG_DATA */
+	out.h   r9, 4[r11]                /* now, control */
+
 	jmp	[lp]
 
 /*------------------------------------------*
- * s16 vdc_spr_get_x(void)                  *
+ * u16 vdc_spr_get_x(void)                  *
  *                                          *
  * inputs:                                  *
  *  None                                    *
@@ -508,21 +494,27 @@ _vdc_spr_create:
  *  r10 = x                                 *
  *------------------------------------------*/
 _vdc_spr_get_x:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 1
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_read
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	jal	_vdc_vram_read
+	addi    1, r12, r12               /* X is second 16-bit word in sprite entry */
 
-	mov	r17, lp
+	movea   VDC_REG_MARR, r0, r13
+	out.h   r13, 0[r11]               /* set VDC_REG_MARR */
+	out.h   r12, 4[r11]               /* set addr to read */
+
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	in.h    4[r11], r10                /* x addr */
+
 	jmp	[lp]
 
+
 /*------------------------------------------*
- * s16 vdc_spr_get_y(void)                  *
+ * u16 vdc_spr_get_y(void)                  *
  *                                          *
  * inputs:                                  *
  *  None                                    *
@@ -531,17 +523,20 @@ _vdc_spr_get_x:
  *  r10 = y                                 *
  *------------------------------------------*/
 _vdc_spr_get_y:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 0
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_read
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	jal	_vdc_vram_read
+	movea   VDC_REG_MARR, r0, r13
+	out.h   r13, 0[r11]               /* set VDC_REG_MARR */
+	out.h   r12, 4[r11]               /* set addr to read (and Y is first word) */
 
-	mov	r17, lp
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	in.h    4[r11], r10               /* y addr */
+
 	jmp	[lp]
 
 /*------------------------------------------*
@@ -554,18 +549,24 @@ _vdc_spr_get_y:
  *  r10 = pattern                           *
  *------------------------------------------*/
 _vdc_spr_get_pattern:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 2
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_read
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	jal	_vdc_vram_read
+	addi    2, r12, r12               /* pattern is third 16-bit word in sprite entry */
 
-	mov	r17, lp
+	movea   VDC_REG_MARR, r0, r13
+	out.h   r13, 0[r11]               /* set VDC_REG_MARR */
+	out.h   r12, 4[r11]               /* set addr to read */
+
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	in.h    4[r11], r10               /* patttern */
+
 	jmp	[lp]
+
 
 /*------------------------------------------*
  * u16 vdc_spr_get_ctrl(void)               *
@@ -577,17 +578,22 @@ _vdc_spr_get_pattern:
  *  r10 = control bit pattern               *
  *------------------------------------------*/
 _vdc_spr_get_ctrl:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 3
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_read
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	jal	_vdc_vram_read
+	addi    3, r12, r12               /* control is fourth 16-bit word in sprite entry */
 
-	mov	r17, lp
+	movea   VDC_REG_MARR, r0, r13
+	out.h   r13, 0[r11]               /* set VDC_REG_MARR */
+	out.h   r12, 4[r11]               /* set addr to read */
+
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	in.h    4[r11], r10               /* control data */
+
 	jmp	[lp]
 
 /*------------------------------------------*
@@ -600,21 +606,25 @@ _vdc_spr_get_ctrl:
  *  r10 = palette                           *
  *------------------------------------------*/
 _vdc_spr_get_pal:
-	mov	lp, r17
-	setup_addr	r20, r19, r18, 1
+	movw    vdc_curr_vdcport, r10
+	ld.w    0[r10], r11               /* port address */
 
-	mov	r19, r6
-	mov	r18, r7
-	jal	_vdc_set_vram_read
+        movw    vdc_curr_spr_addr, r10
+        ld.h    0[r10], r12               /* r12 = vid arr of sprite entry */
 
-	mov	r19, r6
-	jal	_vdc_vram_read
+	addi    3, r12, r12               /* control is fourth 16-bit word in sprite entry */
 
-	andi	0xF, r10, r10
+	movea   VDC_REG_MARR, r0, r13
+	out.h   r13, 0[r11]               /* set VDC_REG_MARR */
+	out.h   r12, 4[r11]               /* set addr to read */
 
-	mov	r17, lp
+	movea   VDC_REG_DATA, r0, r13
+	out.h   r13, 0[r11]
+	in.h    4[r11], r10               /* control data */
+
+	andi	0xF, r10, r10             /* palette portion */
+
 	jmp	[lp]
-
 
 
 /*****************************************************************************
@@ -634,7 +644,7 @@ _vdc_spr_get_pal:
 
 
 /*-----------------------------------------------------------*
- * s16 vdc_status(int chip)                                  *
+ * u16 vdc_status(int chip)                                  *
  *                                                           *
  * inputs:                                                   *
  *  r6 = chip:  which VDC chip to act on (0 - 1)             *
@@ -804,10 +814,10 @@ _vdc_set_satb_address:
         set_vreg_num    VDC_REG_DVSSR, r6, r10, r11
         out.h   r7, 4[r10]
 
-        movw    _satb_base, r10
-	shl	1, r12
+        movw    satb_base, r10         /* array for SATB locations */
+	shl	1, r12                  /* array index * 2 (size)   */
         add     r12, r10
-        st.h    r7, 0[r10]
+        st.h    r7, 0[r10]              /* save new SATB address for sprite function use */
 
         jmp     [lp]
 

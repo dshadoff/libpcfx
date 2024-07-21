@@ -139,23 +139,32 @@ typedef enum {
 // General
 void vdc_init_5MHz(int chip);
 void vdc_init_7MHz(int chip);
-void vdc_set(int chip);
 
 // Sprites
+//
+// How to use:
+// a) initialize VDC
+// b) set which VDC for which the sprites will be acted upon ( vdc_set() )
+// c) set which sprite to work with ( vdc_spr_set() )
+// d) initially, create sprite with vdc_spr_create()
+// e) subsequent updates can act on the individual elements - x, y, palette, etc.
+//
+// See HuC6270 manual for more information about sprites
+//
+void vdc_set(int chip);
 void vdc_spr_set(int spr);
-void vdc_spr_x(s16 x);
-void vdc_spr_y(s16 y);
-void vdc_spr_xy(s16 x, s16 y);
+void vdc_spr_x(u16 x);
+void vdc_spr_y(u16 y);
+void vdc_spr_xy(u16 x, u16 y);
 void vdc_spr_pattern(u16 pat);
-void vdc_spr_pri(int pri);
+void vdc_spr_ctrl(u16 val);
 void vdc_spr_pal(int pal);
-void vdc_spr_ctrl(u16 mask, u16 val);
-void vdc_spr_create(s16 x, s16 y, u16 pat, u16 ctrl);
-s16 vdc_spr_get_x(void);
-s16 vdc_spr_get_y(void);
+void vdc_spr_create(u16 x, u16 y, u16 pat, u16 ctrl);
+u16 vdc_spr_get_x(void);
+u16 vdc_spr_get_y(void);
 u16 vdc_spr_get_pattern(void);
 u16 vdc_spr_get_ctrl(void);
-int vdc_spr_get_pal(void);
+u16 vdc_spr_get_pal(void);
 
 
 
@@ -170,7 +179,7 @@ int vdc_spr_get_pal(void);
  *
  * return value: The VDC status
  */
-s16 vdc_status(int chip);
+u16 vdc_status(int chip);
 
 /* Set a VDC register to a value
  *
