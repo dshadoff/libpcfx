@@ -45,11 +45,11 @@ __attribute__ ((interrupt_handler)) void my_video_irq (void)
    if (vdc_stat & VDC_STAT_RR )
    {
       if (scroll_band == 0) {
-         vdc_set_scroll(VDC0, scroll_x, scroll_1_line - 1);
+         vdc_set_scroll(VDC0, (scroll_x>>1), scroll_1_line - 1);
 	 vdc_set_raster(VDC0, scroll_2_line + 64);  // Need to set raster at line <n> + 64
       }
       else
-         vdc_set_scroll(VDC0, (scroll_x<<1), scroll_2_line - 1);
+         vdc_set_scroll(VDC0, scroll_x, scroll_2_line - 1);
 
       scroll_band++;
    }
@@ -62,7 +62,7 @@ __attribute__ ((interrupt_handler)) void my_video_irq (void)
 
       vdc_set_scroll(VDC0, scroll_x, scroll_y);
 
-      if ((sda_frame_count & 3) == 0)
+      if ((sda_frame_count & 1) == 0)
       {
          scroll_x++;
 
@@ -136,18 +136,18 @@ int main(int argc, char *argv[])
         // load font into video memory
         // font background/foreground should be subpalettes #0 and #3 respectively
         //
-        vdc_set_vram_write(0, 0x1200);
+        vdc_set_vram_write(VDC0, 0x1200);
 
         for(i = 0; i < 0x60; i++) {
            // first 2 planes of color
            for (j = 0; j < 8; j++) {
               img = font[(i*8)+j] & 0xff;
               a = (img << 8) | img;
-              vdc_vram_write(0, a);
+              vdc_vram_write(VDC0, a);
            }
            // last 2 planes of color
            for (j = 0; j < 8; j++) {
-              vdc_vram_write(0, 0);
+              vdc_vram_write(VDC0, 0);
            }
         }
 

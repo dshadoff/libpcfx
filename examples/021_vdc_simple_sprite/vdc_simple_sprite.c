@@ -117,8 +117,15 @@ int main(int argc, char *argv[])
 
 	xl = yl = 1;
 	for(;;) {
-		pad = contrlr_pad_read(0);
 		vdc_spr_xy(x, y);
+
+		/* crude way to make a delay */
+	        /* Following examples should wait for VBlank */
+		for(i = 0; i < 0x6000; i++) {
+			asm("mov r0, r0");
+		}
+		
+		pad = contrlr_pad_read(0);
 
 		if((yl != 1) && (pad & JOY_DOWN))
 			y++;
@@ -134,12 +141,6 @@ int main(int argc, char *argv[])
 		if(y > 238+64-16) yl = 1;
 		else if(y < 64+2) yl = -1;
 		else              yl = 0;
-
-		/* crude way to make a delay */
-	        /* Following examples should wait for VBlank */
-		for(i = 0; i < 0x6000; i++) {
-			asm("mov r0, r0");
-		}
 	}
 
 	return 0;
