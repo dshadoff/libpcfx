@@ -8,47 +8,70 @@ see file LICENSE or http://www.opensource.org/licenses/mit-license.php
 Subsystems
 ================================================================================
 std            -- "Standard" function replicas, with modifications for
-                  efficiency.
+                  efficiency (POSIX functions are also available in the
+                  v4.9.4 of gcc).
+                  **Tested working**.
 
-v810           -- Miscellaneous V810 supports.
+v810           -- Miscellaneous V810 support - IRQs, cache, port-based I/O, etc.
+                  **Tested working**.
 
-contrlr        -- Handles input ports. Tested working. High- and low-level
-                  interfaces exist.
+romfont        -- Activates the in-ROM font processing.
+                  **Tested working**.
 
-bkupmem        -- Handles backup memory access
+contrlr        -- Handles input ports, including joypads and mouse/mice.
+                  **Tested working**.
 
-7up            -- Controls the two 7up VDPs. These were also used in the
-                  PC-Engine. Support is partly tested. Only low-level API exists
-                  currently.
+timer          -- Controls the TIMER functionality.
+                  **Tested working**.
 
-cd             -- High-level interface to the CD drive. Tested working.
+vdc            -- Controls the two HuC6270 video chips, also used in the PC-Engine.
+                  **Tested working**.
 
-king           -- Controls the KING chip, which controls many other peripherals.
-                  Basic support exists and backgrounds have been tested working.
+----- PARTIALLY WORKING BUT INCOMPLETE -----
 
-romfont        -- Activates the in-ROM font processing. Tested working.
-
-soundbox       -- SoundBox PSG support. Similar to the PSG in the PC-Engine.
+sound          -- Sound PSG support. Similar to the PSG in the PC-Engine.
                   PSG support is tested working. Other support is untested.
                   Only low-level API exists currently.
 
-scsi           -- Interface to the SCSI interface on KING. Tested working. Only
-                  low-level API exists currently.
+bkupmem        -- Handles backup memory access
+                  Primitive byte-level, memory-based I/O at this time.
+                  Proper FAT-based I/O with PC-FXGA compatibilty planned for future.
 
-tetsu          -- Controls NEW Tetsukannon, the video controller. Tested
-                  working.
+----- UNDER CONSTRUCTION -----
+
+cd             -- High-level interface to the CD drive.
+                  Original was claimed as 'Tested working', but current status
+                  is under construction.
+
+king           -- Controls the KING chip, which controls many other peripherals.
+                  Basic support exists and backgrounds have been tested working.
+                  Under construction.
+
+scsi           -- Interface to the SCSI interface on KING.
+                  Original was claimed as 'Tested working', but current status
+                  is under construction.
+
+tetsu          -- Controls NEW Tetsukannon, the video controller.
+                  Original was claimed as 'Tested working', but current status
+                  is under construction.
 
 
 Credits
+================================================================================
+dshadoff       -- 2024 Overhaul, bugfixes, new functionality, testing,
+                  documentation
+CheekyBug      -- Additional modernizations and recent v810-gcc updates
+Enthusi        -- Getting the fx_uploader kickstarted, which restarted my
+                  desire to reverse-engineer the PC-FX
+Mednafen       -- Trying to make it even better !
+
+Original Credits (circa 2011)
 ================================================================================
 NEC/Hudson     -- Creating such a cool system
 trap15         -- Code and reverse engineering
 Arikado        -- Support and listening to my rambling while I code
 Ryphecha       -- Inifinite amounts of help
 Mednafen       -- Greatest debugger around!
-dshadoff       -- 2024 Overhaul
-CheekyBug      -- Additional modernizations and recent v810-gcc updates
-Enthusi        -- Getting the fx_uploader kickstarted, restarting reverse-engineering
 #HACKERCHANNEL -- The cool place
 #pcfx @ EFnet  -- EFnet's premier PC-FX channel!
 
