@@ -1,5 +1,5 @@
 /*
-        libp cfx -- A set of libraries for controlling the NEC PC-FX
+        libpcfx -- A set of libraries for controlling the NEC PC-FX
 
                    Based on liberis by Alex Marshall
 
@@ -770,7 +770,7 @@ _vdc_set_raster:
  * inputs:                                                   *
  *  r6 = chip: which VDC chip to act on (0 - 1)              *
  *  r7 = x:    Top-left X coordinate of background           *
- *  r7 = y:    Top-left Y coordinate of background           *
+ *  r8 = y:    Top-left Y coordinate of background           *
  *-----------------------------------------------------------*/
 _vdc_set_scroll:
         shl     8, r6
