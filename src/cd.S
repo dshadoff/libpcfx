@@ -55,8 +55,10 @@ _eris_cd_read:
 	mov	sp, r6
 	mov	10, r7
 	jal	_eris_scsi_command
+#	jal	_scsi_command
 	addi	32, sp, sp
 
+	/* waste 24570 cycles = roughly 1.1 milliseconds */
 	movea	0x800, r0, r10
 1:	nop
 	nop
@@ -72,6 +74,7 @@ _eris_cd_read:
 
 	jal	eris_scsi_eat_data_in
 
+	/* waste 24570 cycles = roughly 1.1 milliseconds */
 	movea	0x800, r0, r10
 1:	nop
 	nop
@@ -124,6 +127,7 @@ _eris_cd_read_kram:
 	mov	sp, r6
 	mov	10, r7
 	jal	_eris_scsi_command
+#	jal	_scsi_command
 	addi	32, sp, sp
 
 	movea	0x800, r0, r10
