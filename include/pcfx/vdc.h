@@ -219,7 +219,7 @@ void vdc_set_vram_read(int chip, u16 addr);
 u16 vdc_vram_read(int chip);
 
 
-/*! Set interrupt information for a VDC chip.
+/* Set interrupt information for a VDC chip.
  *
  * chip:          Which VDC to set interrupts for. (0 ~ 1)
  * vblank_irq:    Whether an IRQ should fire on VBlank.
