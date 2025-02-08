@@ -2,6 +2,7 @@
         liberis -- A set of libraries for controlling the NEC PC-FX
 
 Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
+      and (C) 2024              Dave Shadoff  <GitHub ID: dshadoff>
 
 # This code is licensed to you under the terms of the MIT license;
 # see file LICENSE or http://www.opensource.org/licenses/mit-license.php
@@ -11,11 +12,58 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
  * \brief Low-level control of the KING processor's SCSI controller.
  */
 
-#ifndef _LIBERIS_SCSI_H_
-#define _LIBERIS_SCSI_H_
+#ifndef _LIBPCFX_SCSI_H_
+#define _LIBPCFX_SCSI_H_
 
 #include <pcfx/types.h>
 
+
+#define	SCSI_CDROM			2		/* SCSI LUN of CDROM unit */
+
+#define	SCSI_ERR_TIMEOUT		0xFFFE
+#define	SCSI_ERR_BUS_BUSY		0xFFFF
+
+// #define	SCSI_CMD_TEST_UNIT_READY	0x00
+#define	SCSI_CMD_AUDIO_TRK_SEARCH	0xD8
+ 
+
+typedef struct scsiphasecounts {
+        u32 dataout_sz;
+        u32 datain_sz;
+        u32 command_sz;
+        u32 status_sz;
+        u32 unused1_sz;
+        u32 unused2_sz;
+        u32 msgout_sz;
+        u32 msgin_sz;
+} scsiphscnt;
+
+typedef struct scsibuffers {
+        u8 * data_out;
+        u8 * data_in;
+        u8 * cmd;
+        u8 * stat;
+        u8 * unused1;
+        u8 * unused2;
+        u8 * msg_out;
+        u8 * msg_in;
+} scsibuf;
+
+/* Reset the SCSI drive.
+ */
+void scsi_reset(void);
+
+/* Perform a full SCSI command from start to end (CPU-managed, not DMA)
+ *
+ * devicenum: LUN of SCSI device (0-6, CDROM = 2)
+ * buf:       Pointer to set of counters which track data in/out by phase
+ * buf2:      Pointer to set of buffer pointers with data in/out by phase
+ *
+ * return code = first byte of status phase, or SCSI_ERR_xxx from above
+ */
+int scsi_command(u8 devicenum, scsiphscnt *buf, scsibuf * buf2);
+
+// --------------------------------------------------------------------------------------
 typedef enum
 {
 	SCSI_PHASE_BUS_FREE    = 0,
@@ -55,6 +103,7 @@ typedef enum {
 	SCSI_CMD_PLAY_AUDIO_INDEX = 0x48,
 	SCSI_CMD_PAUSE            = 0x4B,
 } scsi_cmd;
+
 /*! \brief Get SCSI phase.
  * \return Returns the current phase of the SCSI drive.
  */
@@ -64,7 +113,7 @@ scsi_phase eris_scsi_get_phase(void);
  * \return Returns the current state of the SCSI drive.
  */
 scsi_status eris_scsi_status(void);
-/*! \brief Reset the SCSI drive.
+/* Reset the SCSI drive.
  */
 void eris_scsi_reset(void);
 /*! \brief Read data from the SCSI drive.

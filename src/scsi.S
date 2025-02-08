@@ -51,6 +51,7 @@ Copyright (C) 2011              Alex Marshall "trap15" <trap15@raidenii.net>
 
 /* Special constants  */
 .equiv TIMEOUT_LOOP,		 0x40000 /* Timeout (loop iterations) during attempt to initiate SCSI command */
+					 /* 0x40000 = 222ms */
 
 /* Special return codes  */
 .equiv ERR_TIMEOUT,		 0xFFFE	/* Error - Timeout during attempt to initiate SCSI command */
@@ -261,19 +262,20 @@ _scsi_command:
 	movscsireg_v	(INITCMD_ASSERT_DATA | INITCMD_ASSERT_SEL), SCSIREG_INITCMD, r16	/* now select */
 
 
-/* TODO: There should be a TIMEOUT limit to this loop */
 	movw	TIMEOUT_LOOP, r10
 1:	getscsistat	r11
 	andi	SCSISTAT_BSY, r11, r11					/* wait for BSY  as repsonse to SEL */
 	bne	2f
-	add	-1,r10
-	bne	1b
+	add	-1,r10							/* countdown; if countdown finishes, */
+	bne	1b							/* still need to deassert bus */
+
+2:	movscsireg_v	INITCMD_DEASSERT, SCSIREG_INITCMD, r16		/* de-assert databus and SEL */
+
+	ori	0x00, r10, r10
+	bne	waitreq_1						/* no timeout; continue */
 
 	movw	ERR_TIMEOUT, r10
 	br	scsicmd_exit						/* return with error if timed out */
-
-2:									/* Connection is formed, so */
-	movscsireg_v	INITCMD_DEASSERT, SCSIREG_INITCMD, r16		/* de-assert databus etc. */
 
 /* ----- SCSI Connection is made ----- */
 
@@ -285,7 +287,7 @@ waitreq_1:
 	andi	SCSISTAT_BSY, r17, r15		/* r15 is just temp */
 	be	bus_closed
 
-/* TODO: check for reset */
+/* TODO: check for reset and/or abort */
 
 	andi	SCSISTAT_REQ, r17, r15		/* r15 is just temp */
 	be	waitreq_1			/* loop until request */
@@ -310,9 +312,7 @@ bytefromdevice:
 /* get byte of data */
 
 	delay_2800ns
-/* 	getscsireg     SCSIREG_DATA, r11, r16 */
-	out.h	r0, 0x600[r0]			/* KING reg 0 (data) */
-	in.h	0x604[r0], r11			/* read data */
+ 	getscsireg     SCSIREG_DATA, r11, r16
 
 	ld.w	0[r14], r12			/* get current size and increment */
 	add	1, r12
